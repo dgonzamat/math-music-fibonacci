@@ -1,3 +1,4 @@
+
 export interface TimeSignature {
   numerator: number;
   denominator: number;
@@ -88,7 +89,7 @@ export const toolSongs: ToolSong[] = [
     description: "Lateralus is perhaps Tool's most mathematically intricate song, explicitly built around the Fibonacci sequence. The syllable count of the verses follows the sequence (1,1,2,3,5,8,13), and the time signatures cycle through Fibonacci numbers (5/8, 8/8, 13/8). The song's structure itself represents a spiral, mirroring the golden spiral derived from Fibonacci numbers.",
     complexity: 10,
     imageUrl: "/src/assets/lateralus.jpg",
-    audioSrc: "https://filesamples.com/samples/audio/mp3/sample3.mp3" // Sample audio for demonstration
+    audioSrc: "https://www.youtube.com/watch?v=Y7JG63IuaWs" // Tool - Lateralus
   },
   {
     id: "schism",
@@ -148,14 +149,14 @@ export const toolSongs: ToolSong[] = [
     description: "Schism features constantly changing time signatures that create mathematical complexity. While not as explicitly Fibonacci-based as Lateralus, it still incorporates the sequence in its structure and rhythmic patterns. The song's overall composition reflects mathematical division - fitting its lyrical theme of division and separation.",
     complexity: 8,
     imageUrl: "/src/assets/schism.jpg",
-    audioSrc: "https://filesamples.com/samples/audio/mp3/sample2.mp3" // Sample audio for demonstration
+    audioSrc: "https://www.youtube.com/watch?v=MM62wjLrgmA" // Tool - Schism
   },
   {
     id: "fibonacci",
-    title: "Fibonacci",
-    album: "10,000 Days",
-    year: 2006,
-    duration: 480, // 8:00
+    title: "Forty Six & 2",
+    album: "Ænima",
+    year: 1996,
+    duration: 360, // 6:00
     timeSignatures: [
       { numerator: 3, denominator: 4 },
       { numerator: 5, denominator: 8 },
@@ -189,26 +190,26 @@ export const toolSongs: ToolSong[] = [
       {
         name: "Climax",
         startTime: 297,
-        endTime: 421,
+        endTime: 321,
         timeSignature: { numerator: 5, denominator: 8 },
         hasFibonacciPattern: true,
         description: "Returns to 5/8 at precisely the golden ratio point of the song."
       },
       {
         name: "Outro",
-        startTime: 421,
-        endTime: 480,
+        startTime: 321,
+        endTime: 360,
         timeSignature: { numerator: 3, denominator: 4 },
         hasFibonacciPattern: true,
         description: "Concludes with a return to the original time signature, creating mathematical symmetry."
       }
     ],
-    fibonacciMoments: [89, 177, 297, 421],
-    goldenRatioPoint: 297, // ~4:57 into the song
-    description: "This song demonstrates Tool's mastery of mathematical precision in music. The composition is structured around Fibonacci sequences and golden ratio proportions, with key changes and transitions occurring exactly at points determined by these mathematical principles. The rhythmic patterns and time signature changes create a spiral-like effect that mirrors the Fibonacci spiral.",
+    fibonacciMoments: [89, 177, 297, 321],
+    goldenRatioPoint: 222, // ~3:42 into the song
+    description: "Forty Six & 2 explores mathematical concepts related to human evolution and the Fibonacci sequence. The song references Carl Jung and the concept of 'shadow' integration, with musical structures that mirror mathematical progressions. The rhythmic patterns feature Fibonacci proportions throughout the composition.",
     complexity: 9,
     imageUrl: "/src/assets/fibonacci.jpg",
-    audioSrc: "https://filesamples.com/samples/audio/mp3/sample1.mp3" // Sample audio for demonstration
+    audioSrc: "https://www.youtube.com/watch?v=GIuZUCpm9hc" // Tool - Forty Six & 2
   }
 ];
 
