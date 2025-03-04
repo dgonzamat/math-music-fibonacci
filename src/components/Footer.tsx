@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Heart, Github, Twitter, Youtube, Mail, Music, Sigma } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -143,7 +142,7 @@ const Footer: React.FC = () => {
         
         <div className="flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
           <p>
-            © {new Date().getFullYear()} Tool Fibonacci Project. All rights reserved.
+            © {new Date().getFullYear()} Tool Fibonacci Project. Developed by Daniel González Amat. All rights reserved.
           </p>
           <div className="flex items-center mt-4 md:mt-0">
             <span>Created with</span>
