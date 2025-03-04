@@ -36,7 +36,7 @@ const Index = () => {
         <section id="visualizer" className="glass-panel container mx-auto px-4 py-16 my-12">
           <h2 className="section-title text-center">Fibonacci Visualizer</h2>
           <p className="section-subtitle text-center mb-12">Interactive visualization of the Fibonacci sequence and golden ratio</p>
-          <FibonacciVisualizer />
+          <FibonacciVisualizer turns={5} />
         </section>
 
         {/* Music Analysis Section */}

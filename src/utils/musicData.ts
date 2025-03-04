@@ -1,4 +1,3 @@
-
 export interface TimeSignature {
   numerator: number;
   denominator: number;
@@ -26,6 +25,7 @@ export interface ToolSong {
   description: string;
   complexity: number; // 1-10 scale of mathematical complexity
   imageUrl?: string;
+  audioSrc?: string; // Sample audio for demonstration
 }
 
 // Sample data for Tool songs with mathematical analysis
@@ -87,7 +87,8 @@ export const toolSongs: ToolSong[] = [
     goldenRatioPoint: 347, // ~5:47 into the song
     description: "Lateralus is perhaps Tool's most mathematically intricate song, explicitly built around the Fibonacci sequence. The syllable count of the verses follows the sequence (1,1,2,3,5,8,13), and the time signatures cycle through Fibonacci numbers (5/8, 8/8, 13/8). The song's structure itself represents a spiral, mirroring the golden spiral derived from Fibonacci numbers.",
     complexity: 10,
-    imageUrl: "/src/assets/lateralus.jpg"
+    imageUrl: "/src/assets/lateralus.jpg",
+    audioSrc: "https://filesamples.com/samples/audio/mp3/sample3.mp3" // Sample audio for demonstration
   },
   {
     id: "schism",
@@ -146,7 +147,8 @@ export const toolSongs: ToolSong[] = [
     goldenRatioPoint: 249, // ~4:09 into the song
     description: "Schism features constantly changing time signatures that create mathematical complexity. While not as explicitly Fibonacci-based as Lateralus, it still incorporates the sequence in its structure and rhythmic patterns. The song's overall composition reflects mathematical division - fitting its lyrical theme of division and separation.",
     complexity: 8,
-    imageUrl: "/src/assets/schism.jpg"
+    imageUrl: "/src/assets/schism.jpg",
+    audioSrc: "https://filesamples.com/samples/audio/mp3/sample2.mp3" // Sample audio for demonstration
   },
   {
     id: "fibonacci",
@@ -205,7 +207,8 @@ export const toolSongs: ToolSong[] = [
     goldenRatioPoint: 297, // ~4:57 into the song
     description: "This song demonstrates Tool's mastery of mathematical precision in music. The composition is structured around Fibonacci sequences and golden ratio proportions, with key changes and transitions occurring exactly at points determined by these mathematical principles. The rhythmic patterns and time signature changes create a spiral-like effect that mirrors the Fibonacci spiral.",
     complexity: 9,
-    imageUrl: "/src/assets/fibonacci.jpg"
+    imageUrl: "/src/assets/fibonacci.jpg",
+    audioSrc: "https://filesamples.com/samples/audio/mp3/sample1.mp3" // Sample audio for demonstration
   }
 ];
 
@@ -238,4 +241,41 @@ export const getFibonacciVisualData = (songId: string): {timePoints: number[], s
     ].sort((a, b) => a - b),
     sections: song.sections
   };
+};
+
+export const getRecursiveFibonacciPatterns = (songId: string): { level: number; patterns: { startTime: number; endTime: number; description: string }[] }[] => {
+  const song = toolSongs.find(s => s.id === songId);
+  if (!song) return [];
+  
+  // Create multilevel patterns to demonstrate recursivity
+  return [
+    {
+      level: 1, // Macro structure (major sections)
+      patterns: song.sections.map(section => ({
+        startTime: section.startTime,
+        endTime: section.endTime,
+        description: `${section.name}: ${section.description}`
+      }))
+    },
+    {
+      level: 2, // Medium structure (phrases)
+      patterns: song.fibonacciMoments.map((moment, i, arr) => ({
+        startTime: moment,
+        endTime: arr[i + 1] || song.duration,
+        description: `Fibonacci transition at ${Math.floor(moment / 60)}:${Math.floor(moment % 60).toString().padStart(2, '0')}`
+      }))
+    },
+    {
+      level: 3, // Micro structure (rhythmic patterns)
+      patterns: Array.from({ length: 5 }, (_, i) => {
+        const baseTime = song.fibonacciMoments[0] || 0;
+        const startTime = baseTime + i * 8;
+        return {
+          startTime,
+          endTime: startTime + 5,
+          description: `Rhythmic pattern with Fibonacci syllable count`
+        };
+      })
+    }
+  ];
 };
