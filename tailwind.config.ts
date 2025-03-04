@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,23 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                // Custom colors for our application
+                dark: {
+                    DEFAULT: '#121212',
+                    secondary: '#1A1A1A',
+                    tertiary: '#222222'
+                },
+                golden: {
+                    DEFAULT: '#D4AF37',
+                    muted: 'rgba(212, 175, 55, 0.7)',
+                    light: 'rgba(212, 175, 55, 0.1)'
+                },
+                silver: {
+                    DEFAULT: '#C0C0C0',
+                    muted: 'rgba(192, 192, 192, 0.7)',
+                    light: 'rgba(192, 192, 192, 0.1)'
+                }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +101,50 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+                'fade-in': {
+                    '0%': { opacity: '0', transform: 'translateY(10px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' }
+                },
+                'fade-out': {
+                    '0%': { opacity: '1', transform: 'translateY(0)' },
+                    '100%': { opacity: '0', transform: 'translateY(10px)' }
+                },
+                'scale-in': {
+                    '0%': { transform: 'scale(0.95)', opacity: '0' },
+                    '100%': { transform: 'scale(1)', opacity: '1' }
+                },
+                'slide-up': {
+                    '0%': { transform: 'translateY(20px)', opacity: '0' },
+                    '100%': { transform: 'translateY(0)', opacity: '1' }
+                },
+                'rotate-fibonacci': {
+                    '0%': { transform: 'rotate(0deg) scale(0)' },
+                    '100%': { transform: 'rotate(1440deg) scale(1)' }
+                },
+                'pulse-soft': {
+                    '0%, 100%': { opacity: '1' },
+                    '50%': { opacity: '0.7' }
+                }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+                'fade-in': 'fade-in 0.5s ease-out forwards',
+                'fade-out': 'fade-out 0.5s ease-out forwards',
+                'scale-in': 'scale-in 0.3s ease-out forwards',
+                'slide-up': 'slide-up 0.6s ease-out forwards',
+                'rotate-fibonacci': 'rotate-fibonacci 2s cubic-bezier(0.215, 0.61, 0.355, 1) forwards',
+                'pulse-soft': 'pulse-soft 3s infinite ease-in-out'
+			},
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                heading: ['Raleway', 'sans-serif'],
+                mono: ['Roboto Mono', 'monospace']
+            },
+            backgroundImage: {
+                'fibonacci-spiral': "url('/src/assets/fibonacci-spiral.svg')"
+            }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
