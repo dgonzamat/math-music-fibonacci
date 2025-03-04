@@ -1,10 +1,10 @@
 
 import { useEffect, useState } from "react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { FibonacciVisualizer } from "@/components/FibonacciVisualizer";
-import { MusicAnalysis } from "@/components/MusicAnalysis";
-import { EducationalSection } from "@/components/EducationalSection";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import FibonacciVisualizer from "@/components/FibonacciVisualizer";
+import MusicAnalysis from "@/components/MusicAnalysis";
+import EducationalSection from "@/components/EducationalSection";
 
 const Index = () => {
   const [loaded, setLoaded] = useState(false);
