@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ToolSong } from '@/utils/musicData';
+import { ToolSong } from '@/utils/music';
 import { Clock, Music, Sigma } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

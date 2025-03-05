@@ -1,6 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { toolSongs, getFibonacciAnalysis, getFibonacciVisualData, getRecursiveFibonacciPatterns } from '@/utils/musicData';
+import { 
+  toolSongs, 
+  getFibonacciAnalysis, 
+  getFibonacciVisualData, 
+  getRecursiveFibonacciPatterns 
+} from '@/utils/music';
 import { cn } from '@/lib/utils';
 import SongList from './music/SongList';
 import SongAnalysisPanel from './music/SongAnalysisPanel';

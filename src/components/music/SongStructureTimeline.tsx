@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SongSection } from '@/utils/musicData';
+import { SongSection } from '@/utils/music';
 import { cn } from '@/lib/utils';
 
 interface TimelinePoint {
