@@ -18,6 +18,7 @@ export const useAudioPlayer = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.7);
+  const [error, setError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   
   // Format time display (mm:ss)
@@ -33,7 +34,13 @@ export const useAudioPlayer = ({
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            console.error("Error playing audio:", e);
+            setError(true);
+          });
+        }
       }
       setIsPlaying(!isPlaying);
     }
@@ -70,7 +77,13 @@ export const useAudioPlayer = ({
       audioRef.current.currentTime = time;
       setCurrentTime(time);
       if (!isPlaying) {
-        audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            console.error("Error playing audio:", e);
+            setError(true);
+          });
+        }
         setIsPlaying(true);
       }
     }
@@ -97,6 +110,11 @@ export const useAudioPlayer = ({
     }
   };
   
+  // Reset error when audio source changes
+  useEffect(() => {
+    setError(false);
+  }, [audioSrc]);
+  
   // Update time display and progress
   useEffect(() => {
     const audio = audioRef.current;
@@ -113,9 +131,16 @@ export const useAudioPlayer = ({
       setCurrentTime(0);
     };
     
+    const handleError = (e: ErrorEvent) => {
+      console.error("Audio error:", e);
+      setError(true);
+      setIsPlaying(false);
+    };
+    
     if (audio) {
       audio.addEventListener('timeupdate', handleTimeUpdate);
       audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError as EventListener);
       audio.volume = volume;
     }
     
@@ -123,6 +148,7 @@ export const useAudioPlayer = ({
       if (audio) {
         audio.removeEventListener('timeupdate', handleTimeUpdate);
         audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError as EventListener);
       }
     };
   }, [onTimeUpdate, volume]);
@@ -133,6 +159,7 @@ export const useAudioPlayer = ({
     currentTime,
     isMuted,
     volume,
+    error,
     formatTime,
     togglePlay,
     toggleMute,

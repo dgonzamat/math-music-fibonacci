@@ -5,6 +5,7 @@ import ProgressBar from './audio/ProgressBar';
 import PlaybackControls from './audio/PlaybackControls';
 import VolumeControl from './audio/VolumeControl';
 import FibonacciPoints from './audio/FibonacciPoints';
+import { AlertCircle } from 'lucide-react';
 
 interface AudioPlayerProps {
   audioSrc: string;
@@ -25,6 +26,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     currentTime,
     isMuted,
     volume,
+    error,
     formatTime,
     togglePlay,
     toggleMute,
@@ -42,6 +44,13 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   
   return (
     <div className="audio-player glass-panel p-4 rounded-lg">
+      {error ? (
+        <div className="text-red-500 p-2 mb-3 bg-red-100/10 rounded flex items-center">
+          <AlertCircle className="w-4 h-4 mr-2" />
+          <span>Error al cargar el audio. Por favor intenta con otra canción.</span>
+        </div>
+      ) : null}
+      
       <audio ref={audioRef} src={audioSrc} preload="metadata" />
       
       {/* Progress bar component */}
