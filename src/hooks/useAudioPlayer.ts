@@ -1,5 +1,19 @@
 
 import { useState, useRef, useEffect } from 'react';
+import { formatTime } from '@/utils/audio/formatTime';
+import { 
+  skipToPoint as skipToPointUtil,
+  skipToPrevFibonacciPoint as skipToPrevUtil,
+  skipToNextFibonacciPoint as skipToNextUtil 
+} from '@/utils/audio/playbackControls';
+import {
+  switchToSpotify as switchToSpotifyUtil,
+  togglePlayWithErrorHandling
+} from '@/utils/audio/errorHandling';
+import {
+  handleVolumeChange as handleVolumeChangeUtil,
+  toggleMute as toggleMuteUtil
+} from '@/utils/audio/volumeControls';
 
 interface UseAudioPlayerProps {
   audioSrc: string;
@@ -24,60 +38,33 @@ export const useAudioPlayer = ({
   const [useSpotify, setUseSpotify] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   
-  // Format time display (mm:ss)
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-  
   // Handle play/pause
   const togglePlay = () => {
-    if (useSpotify && spotifyUri) {
-      // Si estamos usando Spotify, abrimos la canción en Spotify
-      window.open(spotifyUri, '_blank');
-      return;
-    }
-    
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(e => {
-            console.error("Error playing audio:", e);
-            setError(true);
-            // Si hay un error, intentamos usar Spotify
-            setUseSpotify(true);
-          });
-        }
-      }
-      setIsPlaying(!isPlaying);
-    }
+    togglePlayWithErrorHandling(
+      audioRef,
+      isPlaying,
+      setIsPlaying,
+      setError,
+      setUseSpotify,
+      useSpotify,
+      spotifyUri
+    );
   };
   
   // Switch to Spotify
   const switchToSpotify = () => {
-    setUseSpotify(true);
-    setError(false);
+    switchToSpotifyUtil(setError, setUseSpotify);
   };
   
   // Handle mute/unmute
   const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
+    toggleMuteUtil(audioRef, isMuted, setIsMuted);
   };
   
   // Handle volume change
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-    }
+    handleVolumeChangeUtil(audioRef, setVolume, newVolume);
   };
   
   // Handle seeking
@@ -90,52 +77,25 @@ export const useAudioPlayer = ({
   
   // Skip to specific Fibonacci point
   const skipToPoint = (time: number) => {
-    if (useSpotify && spotifyUri) {
-      // Si estamos usando Spotify, solo abrimos Spotify
-      window.open(spotifyUri, '_blank');
-      return;
-    }
-    
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setCurrentTime(time);
-      if (!isPlaying) {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(e => {
-            console.error("Error playing audio:", e);
-            setError(true);
-            setUseSpotify(true);
-          });
-        }
-        setIsPlaying(true);
-      }
-    }
+    skipToPointUtil(
+      audioRef,
+      setCurrentTime,
+      setIsPlaying,
+      setError,
+      setUseSpotify,
+      time,
+      useSpotify,
+      spotifyUri
+    );
   };
   
   // Skip to previous/next Fibonacci point
   const skipToPrevFibonacciPoint = () => {
-    if (useSpotify) return;
-    
-    const prevPoint = fibonacciPoints.filter(point => point < currentTime).pop();
-    if (prevPoint !== undefined) {
-      skipToPoint(prevPoint);
-    } else if (fibonacciPoints.length > 0) {
-      // If no previous point, go to the last point
-      skipToPoint(fibonacciPoints[fibonacciPoints.length - 1]);
-    }
+    skipToPrevUtil(currentTime, fibonacciPoints, skipToPoint, useSpotify);
   };
   
   const skipToNextFibonacciPoint = () => {
-    if (useSpotify) return;
-    
-    const nextPoint = fibonacciPoints.find(point => point > currentTime);
-    if (nextPoint !== undefined) {
-      skipToPoint(nextPoint);
-    } else if (fibonacciPoints.length > 0) {
-      // If no next point, go back to the first point
-      skipToPoint(fibonacciPoints[0]);
-    }
+    skipToNextUtil(currentTime, fibonacciPoints, skipToPoint, useSpotify);
   };
   
   // Reset error when audio source changes
