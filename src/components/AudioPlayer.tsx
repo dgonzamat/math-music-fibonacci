@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import ProgressBar from './audio/ProgressBar';
 import PlaybackControls from './audio/PlaybackControls';
 import VolumeControl from './audio/VolumeControl';
 import FibonacciPoints from './audio/FibonacciPoints';
-import { AlertCircle, Music, Spotify } from 'lucide-react';
+import { AlertCircle, Music } from 'lucide-react';
 
 interface AudioPlayerProps {
   audioSrc: string;
@@ -57,7 +56,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
             onClick={switchToSpotify}
             className="ml-2 bg-[#1DB954] text-white px-3 py-1 rounded-full text-xs flex items-center"
           >
-            <Spotify className="w-3 h-3 mr-1" />
+            <Music className="w-3 h-3 mr-1" />
             Usar Spotify
           </button>
         </div>
@@ -66,7 +65,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       {useSpotify ? (
         <div className="bg-[#1DB954]/10 p-3 rounded-lg mb-4">
           <div className="flex items-center text-[#1DB954]">
-            <Spotify className="w-5 h-5 mr-2" />
+            <Music className="w-5 h-5 mr-2" />
             <span className="font-medium">Escuchar en Spotify</span>
           </div>
           <p className="text-sm text-silver mt-1">
