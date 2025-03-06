@@ -25,7 +25,7 @@ export const togglePlayWithErrorHandling = (
   spotifyUri?: string
 ) => {
   if (useSpotify && spotifyUri) {
-    // Si estamos usando Spotify, abrimos la canción en Spotify
+    // If we're using Spotify, open the song in Spotify
     window.open(spotifyUri, '_blank');
     return;
   }
