@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import ProgressBar from './audio/ProgressBar';
 import PlaybackControls from './audio/PlaybackControls';
@@ -45,6 +46,26 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     onTimeUpdate,
     spotifyUri
   });
+
+  // Estado para el iframe de Spotify
+  const [spotifyEmbedLoaded, setSpotifyEmbedLoaded] = useState(false);
+  
+  // Preparar la URL de Spotify para embeber
+  const getSpotifyEmbedUrl = () => {
+    if (!spotifyUri) return '';
+    
+    // Convertir URI (spotify:track:1234567) a formato embebido (https://open.spotify.com/embed/track/1234567)
+    const parts = spotifyUri.split(':');
+    if (parts.length >= 3) {
+      return `https://open.spotify.com/embed/${parts[1]}/${parts[2]}`;
+    }
+    return '';
+  };
+  
+  // Manejar cuando el iframe está cargado
+  const handleSpotifyLoad = () => {
+    setSpotifyEmbedLoaded(true);
+  };
   
   return (
     <div className="audio-player glass-panel p-4 rounded-lg">
@@ -64,20 +85,40 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       
       {useSpotify ? (
         <div className="bg-[#1DB954]/10 p-3 rounded-lg mb-4">
-          <div className="flex items-center text-[#1DB954]">
+          <div className="flex items-center text-[#1DB954] mb-2">
             <Music className="w-5 h-5 mr-2" />
-            <span className="font-medium">Escuchar en Spotify</span>
+            <span className="font-medium">Reproducir con Spotify</span>
           </div>
-          <p className="text-sm text-silver mt-1">
-            Haz clic en el botón de reproducción para abrir Spotify y escuchar esta canción.
-          </p>
-          <button
-            onClick={togglePlay}
-            className="mt-2 bg-[#1DB954] text-white px-4 py-2 rounded-md flex items-center"
-          >
-            <Music className="w-4 h-4 mr-2" />
-            Abrir en Spotify
-          </button>
+          
+          {spotifyUri && (
+            <div className="spotify-embed w-full" style={{ minHeight: "80px" }}>
+              <iframe 
+                src={getSpotifyEmbedUrl()} 
+                width="100%" 
+                height="80" 
+                frameBorder="0" 
+                allow="encrypted-media" 
+                onLoad={handleSpotifyLoad}
+                className={`rounded-md transition-opacity duration-300 ${spotifyEmbedLoaded ? 'opacity-100' : 'opacity-0'}`}
+              ></iframe>
+              
+              {!spotifyEmbedLoaded && (
+                <div className="flex justify-center items-center h-20 bg-dark-tertiary/50 rounded-md animate-pulse">
+                  <Music className="w-6 h-6 text-[#1DB954] animate-bounce" />
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Mantener los controles para ver los puntos de Fibonacci */}
+          <div className="mt-4">
+            <FibonacciPoints
+              fibonacciPoints={fibonacciPoints}
+              currentTime={currentTime}
+              onPointClick={skipToPoint}
+              formatTime={formatTime}
+            />
+          </div>
         </div>
       ) : (
         <>

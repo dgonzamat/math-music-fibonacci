@@ -24,11 +24,8 @@ export const togglePlayWithErrorHandling = (
   useSpotify: boolean,
   spotifyUri?: string
 ) => {
-  if (useSpotify && spotifyUri) {
-    // If we're using Spotify, open the song in Spotify
-    window.open(spotifyUri, '_blank');
-    return;
-  }
+  // Even if using Spotify, we don't redirect anymore
+  // Instead we'll handle it in the component
   
   if (audioRef.current) {
     if (isPlaying) {

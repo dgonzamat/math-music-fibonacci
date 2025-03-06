@@ -20,11 +20,7 @@ export const skipToPoint = (
   useSpotify: boolean,
   spotifyUri?: string
 ) => {
-  if (useSpotify && spotifyUri) {
-    // Si estamos usando Spotify, solo abrimos Spotify
-    window.open(spotifyUri, '_blank');
-    return;
-  }
+  // We don't open Spotify anymore, we'll handle playback in the component
   
   if (audioRef.current) {
     audioRef.current.currentTime = time;
@@ -52,7 +48,7 @@ export const skipToPrevFibonacciPoint = (
   skipToPointFn: (time: number) => void,
   useSpotify: boolean
 ) => {
-  if (useSpotify) return;
+  // Allow skipping even with Spotify
   
   const prevPoint = fibonacciPoints.filter(point => point < currentTime).pop();
   if (prevPoint !== undefined) {
@@ -72,7 +68,7 @@ export const skipToNextFibonacciPoint = (
   skipToPointFn: (time: number) => void,
   useSpotify: boolean
 ) => {
-  if (useSpotify) return;
+  // Allow skipping even with Spotify
   
   const nextPoint = fibonacciPoints.find(point => point > currentTime);
   if (nextPoint !== undefined) {
