@@ -38,13 +38,14 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
       
       <p className="text-muted-foreground mb-4">{song.description}</p>
       
-      {song.audioSrc && (
+      {(song.audioSrc || song.spotifyUri) && (
         <div className="mb-6">
           <AudioPlayer 
-            audioSrc={song.audioSrc}
+            audioSrc={song.audioSrc || ''}
             songDuration={song.duration}
             fibonacciPoints={song.fibonacciMoments}
             onTimeUpdate={onTimeUpdate}
+            spotifyUri={song.spotifyUri}
           />
         </div>
       )}

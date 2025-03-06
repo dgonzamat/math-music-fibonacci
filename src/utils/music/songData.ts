@@ -61,7 +61,8 @@ export const toolSongs: ToolSong[] = [
     description: "Lateralus is perhaps Tool's most mathematically intricate song, explicitly built around the Fibonacci sequence. The syllable count of the verses follows the sequence (1,1,2,3,5,8,13), and the time signatures cycle through Fibonacci numbers (5/8, 8/8, 13/8). The song's structure itself represents a spiral, mirroring the golden spiral derived from Fibonacci numbers.",
     complexity: 10,
     imageUrl: "/src/assets/lateralus.jpg",
-    audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/lateralus-sample.mp3" // Actualizado a un enlace real de muestra
+    audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/lateralus-sample.mp3",
+    spotifyUri: "spotify:track:7tvuLLroI0n6uYBWuFJBDi"
   },
   {
     id: "schism",
@@ -121,7 +122,8 @@ export const toolSongs: ToolSong[] = [
     description: "Schism features constantly changing time signatures that create mathematical complexity. While not as explicitly Fibonacci-based as Lateralus, it still incorporates the sequence in its structure and rhythmic patterns. The song's overall composition reflects mathematical division - fitting its lyrical theme of division and separation.",
     complexity: 8,
     imageUrl: "/src/assets/schism.jpg",
-    audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/schism-sample.mp3" // Actualizado a un enlace real de muestra
+    audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/schism-sample.mp3",
+    spotifyUri: "spotify:track:7EAdCXBGwmYQQTM0QpvGP6"
   },
   {
     id: "fibonacci",
@@ -181,6 +183,7 @@ export const toolSongs: ToolSong[] = [
     description: "Forty Six & 2 explores mathematical concepts related to human evolution and the Fibonacci sequence. The song references Carl Jung and the concept of 'shadow' integration, with musical structures that mirror mathematical progressions. The rhythmic patterns feature Fibonacci proportions throughout the composition.",
     complexity: 9,
     imageUrl: "/src/assets/fibonacci.jpg",
-    audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/fortysix-and-2-sample.mp3" // Actualizado a un enlace real de muestra
+    audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/fortysix-and-2-sample.mp3",
+    spotifyUri: "spotify:track:3BJrbV0xWPPkGZ3DC2XQz6"
   }
 ];

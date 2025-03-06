@@ -27,4 +27,5 @@ export interface ToolSong {
   complexity: number; // 1-10 scale of mathematical complexity
   imageUrl?: string;
   audioSrc?: string; // Sample audio for demonstration
+  spotifyUri?: string; // URI para abrir la canción en Spotify
 }

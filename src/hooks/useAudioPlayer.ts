@@ -6,19 +6,22 @@ interface UseAudioPlayerProps {
   songDuration: number;
   fibonacciPoints: number[];
   onTimeUpdate?: (currentTime: number) => void;
+  spotifyUri?: string;
 }
 
 export const useAudioPlayer = ({
   audioSrc,
   songDuration,
   fibonacciPoints,
-  onTimeUpdate
+  onTimeUpdate,
+  spotifyUri
 }: UseAudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [error, setError] = useState(false);
+  const [useSpotify, setUseSpotify] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   
   // Format time display (mm:ss)
@@ -30,6 +33,12 @@ export const useAudioPlayer = ({
   
   // Handle play/pause
   const togglePlay = () => {
+    if (useSpotify && spotifyUri) {
+      // Si estamos usando Spotify, abrimos la canción en Spotify
+      window.open(spotifyUri, '_blank');
+      return;
+    }
+    
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -39,11 +48,19 @@ export const useAudioPlayer = ({
           playPromise.catch(e => {
             console.error("Error playing audio:", e);
             setError(true);
+            // Si hay un error, intentamos usar Spotify
+            setUseSpotify(true);
           });
         }
       }
       setIsPlaying(!isPlaying);
     }
+  };
+  
+  // Switch to Spotify
+  const switchToSpotify = () => {
+    setUseSpotify(true);
+    setError(false);
   };
   
   // Handle mute/unmute
@@ -73,6 +90,12 @@ export const useAudioPlayer = ({
   
   // Skip to specific Fibonacci point
   const skipToPoint = (time: number) => {
+    if (useSpotify && spotifyUri) {
+      // Si estamos usando Spotify, solo abrimos Spotify
+      window.open(spotifyUri, '_blank');
+      return;
+    }
+    
     if (audioRef.current) {
       audioRef.current.currentTime = time;
       setCurrentTime(time);
@@ -82,6 +105,7 @@ export const useAudioPlayer = ({
           playPromise.catch(e => {
             console.error("Error playing audio:", e);
             setError(true);
+            setUseSpotify(true);
           });
         }
         setIsPlaying(true);
@@ -91,6 +115,8 @@ export const useAudioPlayer = ({
   
   // Skip to previous/next Fibonacci point
   const skipToPrevFibonacciPoint = () => {
+    if (useSpotify) return;
+    
     const prevPoint = fibonacciPoints.filter(point => point < currentTime).pop();
     if (prevPoint !== undefined) {
       skipToPoint(prevPoint);
@@ -101,6 +127,8 @@ export const useAudioPlayer = ({
   };
   
   const skipToNextFibonacciPoint = () => {
+    if (useSpotify) return;
+    
     const nextPoint = fibonacciPoints.find(point => point > currentTime);
     if (nextPoint !== undefined) {
       skipToPoint(nextPoint);
@@ -113,6 +141,7 @@ export const useAudioPlayer = ({
   // Reset error when audio source changes
   useEffect(() => {
     setError(false);
+    setUseSpotify(false);
   }, [audioSrc]);
   
   // Update time display and progress
@@ -160,6 +189,7 @@ export const useAudioPlayer = ({
     isMuted,
     volume,
     error,
+    useSpotify,
     formatTime,
     togglePlay,
     toggleMute,
@@ -167,6 +197,7 @@ export const useAudioPlayer = ({
     handleSeek,
     skipToPoint,
     skipToPrevFibonacciPoint,
-    skipToNextFibonacciPoint
+    skipToNextFibonacciPoint,
+    switchToSpotify
   };
 };
