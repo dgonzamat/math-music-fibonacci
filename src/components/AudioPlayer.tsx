@@ -50,6 +50,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
   // Estado para el iframe de Spotify
   const [spotifyEmbedLoaded, setSpotifyEmbedLoaded] = useState(false);
+  const [spotifyError, setSpotifyError] = useState(false);
   
   // Check for audio source on mount
   useEffect(() => {
@@ -57,16 +58,21 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     if ((!audioSrc || audioSrc === '') && spotifyUri) {
       switchToSpotify();
     }
-  }, [audioSrc, spotifyUri]);
+  }, [audioSrc, spotifyUri, switchToSpotify]);
   
   // Preparar la URL de Spotify para embeber
   const getSpotifyEmbedUrl = () => {
     if (!spotifyUri) return '';
     
+    // Verificar si el URI ya es una URL completa
+    if (spotifyUri.startsWith('https://')) {
+      return spotifyUri;
+    }
+    
     // Convertir URI (spotify:track:1234567) a formato embebido (https://open.spotify.com/embed/track/1234567)
     const parts = spotifyUri.split(':');
     if (parts.length >= 3) {
-      return `https://open.spotify.com/embed/${parts[1]}/${parts[2]}`;
+      return `https://open.spotify.com/embed/${parts[1]}/${parts[2]}?utm_source=generator`;
     }
     return '';
   };
@@ -74,7 +80,16 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   // Manejar cuando el iframe está cargado
   const handleSpotifyLoad = () => {
     setSpotifyEmbedLoaded(true);
+    setSpotifyError(false);
     toast.success("Spotify player loaded");
+  };
+  
+  // Manejar error de carga de Spotify
+  const handleSpotifyError = () => {
+    console.error("Error loading Spotify iframe");
+    setSpotifyError(true);
+    setSpotifyEmbedLoaded(false);
+    toast.error("Error loading Spotify player");
   };
   
   return (
@@ -102,17 +117,35 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           
           {spotifyUri && (
             <div className="spotify-embed w-full" style={{ minHeight: "80px" }}>
-              <iframe 
-                src={getSpotifyEmbedUrl()} 
-                width="100%" 
-                height="80" 
-                frameBorder="0" 
-                allow="autoplay; encrypted-media" 
-                onLoad={handleSpotifyLoad}
-                className={`rounded-md transition-opacity duration-300 ${spotifyEmbedLoaded ? 'opacity-100' : 'opacity-0'}`}
-              ></iframe>
+              {spotifyError ? (
+                <div className="flex flex-col items-center justify-center h-20 bg-red-900/20 rounded-md p-2">
+                  <p className="text-sm text-red-400 mb-2">Error al cargar el reproductor de Spotify</p>
+                  <a 
+                    href={spotifyUri.startsWith('spotify:') ? `https://open.spotify.com/track/${spotifyUri.split(':')[2]}` : spotifyUri}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-[#1DB954] text-white px-3 py-1 rounded-full text-xs flex items-center"
+                  >
+                    <Music className="w-3 h-3 mr-1" />
+                    Abrir en Spotify
+                  </a>
+                </div>
+              ) : (
+                <iframe 
+                  src={getSpotifyEmbedUrl()} 
+                  width="100%" 
+                  height="80" 
+                  frameBorder="0" 
+                  allowFullScreen
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                  loading="lazy"
+                  onLoad={handleSpotifyLoad}
+                  onError={handleSpotifyError}
+                  className={`rounded-md transition-opacity duration-300 ${spotifyEmbedLoaded ? 'opacity-100' : 'opacity-0'}`}
+                ></iframe>
+              )}
               
-              {!spotifyEmbedLoaded && (
+              {!spotifyEmbedLoaded && !spotifyError && (
                 <div className="flex justify-center items-center h-20 bg-dark-tertiary/50 rounded-md animate-pulse">
                   <Music className="w-6 h-6 text-[#1DB954] animate-bounce" />
                 </div>

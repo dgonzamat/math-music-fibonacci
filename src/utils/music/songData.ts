@@ -62,7 +62,7 @@ export const toolSongs: ToolSong[] = [
     complexity: 10,
     imageUrl: "/src/assets/lateralus.jpg",
     audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/lateralus-sample.mp3",
-    spotifyUri: "spotify:track:7tvuLLroI0n6uYBWuFJBDi"
+    spotifyUri: "https://open.spotify.com/embed/track/7tvuLLroI0n6uYBWuFJBDi?utm_source=generator"
   },
   {
     id: "schism",
@@ -123,7 +123,7 @@ export const toolSongs: ToolSong[] = [
     complexity: 8,
     imageUrl: "/src/assets/schism.jpg",
     audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/schism-sample.mp3",
-    spotifyUri: "spotify:track:7EAdCXBGwmYQQTM0QpvGP6"
+    spotifyUri: "https://open.spotify.com/embed/track/7EAdCXBGwmYQQTM0QpvGP6?utm_source=generator"
   },
   {
     id: "fibonacci",
@@ -184,6 +184,6 @@ export const toolSongs: ToolSong[] = [
     complexity: 9,
     imageUrl: "/src/assets/fibonacci.jpg",
     audioSrc: "https://audio-samples-tool-songs.s3.amazonaws.com/fortysix-and-2-sample.mp3",
-    spotifyUri: "spotify:track:3BJrbV0xWPPkGZ3DC2XQz6"
+    spotifyUri: "https://open.spotify.com/embed/track/3BJrbV0xWPPkGZ3DC2XQz6?utm_source=generator"
   }
 ];

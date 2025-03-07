@@ -40,16 +40,26 @@ export const skipToPoint = (
             })
             .catch(e => {
               console.error("Error playing audio after seeking:", e);
-              setError(true);
-              setUseSpotify(true);
-              setIsPlaying(false);
+              if (spotifyUri) {
+                setError(true);
+                setUseSpotify(true);
+                setIsPlaying(false);
+              } else {
+                setError(true);
+                setIsPlaying(false);
+              }
             });
         }
       } catch (e) {
         console.error("Exception playing audio after seeking:", e);
-        setError(true);
-        setUseSpotify(true);
-        setIsPlaying(false);
+        if (spotifyUri) {
+          setError(true);
+          setUseSpotify(true);
+          setIsPlaying(false);
+        } else {
+          setError(true);
+          setIsPlaying(false);
+        }
       }
     }
   }
