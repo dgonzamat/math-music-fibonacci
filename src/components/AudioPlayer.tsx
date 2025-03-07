@@ -15,6 +15,7 @@ interface AudioPlayerProps {
   fibonacciPoints: number[]; // timestamps in seconds
   onTimeUpdate?: (currentTime: number) => void;
   spotifyUri?: string;
+  songId?: string; // Added songId prop
 }
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({
@@ -22,7 +23,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   songDuration,
   fibonacciPoints,
   onTimeUpdate,
-  spotifyUri
+  spotifyUri,
+  songId
 }) => {
   // Generate fallback audio source 
   const getFallbackAudioSrc = (src: string) => {
@@ -136,6 +138,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           fibonacciPoints={fibonacciPoints}
           currentTime={currentTime}
           skipToPoint={skipToPoint}
+          songId={songId}
         />
       ) : (
         <>

@@ -51,6 +51,7 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
             fibonacciPoints={song.fibonacciMoments}
             onTimeUpdate={onTimeUpdate}
             spotifyUri={song.spotifyUri}
+            songId={song.id}
           />
         </div>
       ) : (

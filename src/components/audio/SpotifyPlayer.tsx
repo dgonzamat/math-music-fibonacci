@@ -9,36 +9,46 @@ interface SpotifyPlayerProps {
   fibonacciPoints: number[];
   currentTime: number;
   skipToPoint: (time: number) => void;
+  songId?: string;
 }
 
 const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
   formatTime,
   fibonacciPoints,
   currentTime,
-  skipToPoint
+  skipToPoint,
+  songId
 }) => {
-  const [spotifyEmbedLoaded, setSpotifyEmbedLoaded] = useState(false);
-  const [spotifyError, setSpotifyError] = useState(false);
+  const [playerLoaded, setPlayerLoaded] = useState(false);
+  const [playerError, setPlayerError] = useState(false);
   
-  // Prepare YouTube embed URL as alternative
-  const getYouTubeEmbedUrl = () => {
-    // You can customize this based on the song information if available
-    const songTitle = 'tool lateralus';
-    return `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(songTitle)}`;
+  // Get the correct YouTube URL based on the song ID
+  const getYouTubeUrl = () => {
+    switch (songId) {
+      case 'lateralus':
+        return 'https://www.youtube.com/embed/Y7JG63IuaWs';
+      case 'schism':
+        return 'https://www.youtube.com/embed/80RtBeB61LE';
+      case 'fibonacci': // Forty Six & 2
+        return 'https://www.youtube.com/embed/GIuZUCpm9hc';
+      default:
+        // Fallback to Lateralus if no match
+        return 'https://www.youtube.com/embed/Y7JG63IuaWs';
+    }
   };
   
   // Handle when the iframe is loaded
-  const handleAlternativePlayerLoad = () => {
-    setSpotifyEmbedLoaded(true);
-    setSpotifyError(false);
+  const handlePlayerLoad = () => {
+    setPlayerLoaded(true);
+    setPlayerError(false);
     toast.success("Reproductor alternativo cargado");
   };
   
   // Handle load error
-  const handleAlternativePlayerError = () => {
+  const handlePlayerError = () => {
     console.error("Error loading alternative player iframe");
-    setSpotifyError(true);
-    setSpotifyEmbedLoaded(false);
+    setPlayerError(true);
+    setPlayerLoaded(false);
     toast.error("Error al cargar el reproductor alternativo");
   };
 
@@ -50,12 +60,12 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
       </div>
       
       <div className="alternative-player w-full" style={{ minHeight: "80px" }}>
-        {spotifyError ? (
+        {playerError ? (
           <div className="flex flex-col items-center justify-center h-20 bg-red-900/20 rounded-md p-2">
             <p className="text-sm text-red-400 mb-2">Error al cargar el reproductor alternativo</p>
             <div className="flex gap-2">
               <a 
-                href={getYouTubeEmbedUrl()}
+                href={getYouTubeUrl()}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="bg-red-500 text-white px-3 py-1 rounded-full text-xs flex items-center"
@@ -67,20 +77,20 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
           </div>
         ) : (
           <iframe 
-            src={getYouTubeEmbedUrl()} 
+            src={getYouTubeUrl()} 
             width="100%" 
-            height="80" 
+            height="180" 
             frameBorder="0" 
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             loading="lazy"
-            onLoad={handleAlternativePlayerLoad}
-            onError={handleAlternativePlayerError}
-            className={`rounded-md transition-opacity duration-300 ${spotifyEmbedLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={handlePlayerLoad}
+            onError={handlePlayerError}
+            className={`rounded-md transition-opacity duration-300 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
           ></iframe>
         )}
         
-        {!spotifyEmbedLoaded && !spotifyError && (
+        {!playerLoaded && !playerError && (
           <div className="flex justify-center items-center h-20 bg-dark-tertiary/50 rounded-md animate-pulse">
             <Music className="w-6 h-6 text-purple-400 animate-bounce" />
           </div>
