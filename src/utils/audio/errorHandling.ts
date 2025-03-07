@@ -24,22 +24,37 @@ export const togglePlayWithErrorHandling = (
   useSpotify: boolean,
   spotifyUri?: string
 ) => {
-  // Even if using Spotify, we don't redirect anymore
-  // Instead we'll handle it in the component
+  // If we're already using Spotify, don't attempt to play the audio
+  if (useSpotify) {
+    setIsPlaying(!isPlaying);
+    return;
+  }
   
   if (audioRef.current) {
     if (isPlaying) {
       audioRef.current.pause();
+      setIsPlaying(false);
     } else {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(e => {
-          console.error("Error playing audio:", e);
-          setError(true);
-          setUseSpotify(true);
-        });
+      try {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch(e => {
+              console.error("Error playing audio:", e);
+              setError(true);
+              setUseSpotify(true);
+              setIsPlaying(false);
+            });
+        }
+      } catch (e) {
+        console.error("Exception playing audio:", e);
+        setError(true);
+        setUseSpotify(true);
+        setIsPlaying(false);
       }
     }
-    setIsPlaying(!isPlaying);
   }
 };

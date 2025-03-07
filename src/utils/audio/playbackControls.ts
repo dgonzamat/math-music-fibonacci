@@ -20,21 +20,37 @@ export const skipToPoint = (
   useSpotify: boolean,
   spotifyUri?: string
 ) => {
-  // We don't open Spotify anymore, we'll handle playback in the component
+  // If using Spotify, just update the time for UI display
+  if (useSpotify) {
+    setCurrentTime(time);
+    return;
+  }
   
   if (audioRef.current) {
     audioRef.current.currentTime = time;
     setCurrentTime(time);
+    
     if (!audioRef.current.paused) {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(e => {
-          console.error("Error playing audio:", e);
-          setError(true);
-          setUseSpotify(true);
-        });
+      try {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch(e => {
+              console.error("Error playing audio after seeking:", e);
+              setError(true);
+              setUseSpotify(true);
+              setIsPlaying(false);
+            });
+        }
+      } catch (e) {
+        console.error("Exception playing audio after seeking:", e);
+        setError(true);
+        setUseSpotify(true);
+        setIsPlaying(false);
       }
-      setIsPlaying(true);
     }
   }
 };

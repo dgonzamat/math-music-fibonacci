@@ -6,6 +6,7 @@ import PlaybackControls from './audio/PlaybackControls';
 import VolumeControl from './audio/VolumeControl';
 import FibonacciPoints from './audio/FibonacciPoints';
 import { AlertCircle, Music } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AudioPlayerProps {
   audioSrc: string;
@@ -50,6 +51,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   // Estado para el iframe de Spotify
   const [spotifyEmbedLoaded, setSpotifyEmbedLoaded] = useState(false);
   
+  // Check for audio source on mount
+  useEffect(() => {
+    // If no audio source and has Spotify URI, switch to Spotify
+    if ((!audioSrc || audioSrc === '') && spotifyUri) {
+      switchToSpotify();
+    }
+  }, [audioSrc, spotifyUri]);
+  
   // Preparar la URL de Spotify para embeber
   const getSpotifyEmbedUrl = () => {
     if (!spotifyUri) return '';
@@ -65,6 +74,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   // Manejar cuando el iframe está cargado
   const handleSpotifyLoad = () => {
     setSpotifyEmbedLoaded(true);
+    toast.success("Spotify player loaded");
   };
   
   return (
@@ -97,7 +107,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 width="100%" 
                 height="80" 
                 frameBorder="0" 
-                allow="encrypted-media" 
+                allow="autoplay; encrypted-media" 
                 onLoad={handleSpotifyLoad}
                 className={`rounded-md transition-opacity duration-300 ${spotifyEmbedLoaded ? 'opacity-100' : 'opacity-0'}`}
               ></iframe>
