@@ -14,6 +14,7 @@ import {
   handleVolumeChange as handleVolumeChangeUtil,
   toggleMute as toggleMuteUtil
 } from '@/utils/audio/volumeControls';
+import { toast } from 'sonner';
 
 interface UseAudioPlayerProps {
   audioSrc: string;
@@ -21,6 +22,7 @@ interface UseAudioPlayerProps {
   fibonacciPoints: number[];
   onTimeUpdate?: (currentTime: number) => void;
   spotifyUri?: string;
+  fallbackAudioSrc?: string;
 }
 
 export const useAudioPlayer = ({
@@ -28,7 +30,8 @@ export const useAudioPlayer = ({
   songDuration,
   fibonacciPoints,
   onTimeUpdate,
-  spotifyUri
+  spotifyUri,
+  fallbackAudioSrc
 }: UseAudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -36,6 +39,7 @@ export const useAudioPlayer = ({
   const [volume, setVolume] = useState(0.7);
   const [error, setError] = useState(false);
   const [useSpotify, setUseSpotify] = useState(false);
+  const [currentAudioSrc, setCurrentAudioSrc] = useState(audioSrc);
   const audioRef = useRef<HTMLAudioElement>(null);
   
   // Handle play/pause
@@ -54,6 +58,7 @@ export const useAudioPlayer = ({
   // Switch to Spotify
   const switchToSpotify = () => {
     switchToSpotifyUtil(setError, setUseSpotify);
+    toast.info("Cambiando a reproductor alternativo");
   };
   
   // Handle mute/unmute
@@ -98,10 +103,43 @@ export const useAudioPlayer = ({
     skipToNextUtil(currentTime, fibonacciPoints, skipToPoint, useSpotify);
   };
   
+  // Try alternative audio source
+  const tryAlternativeSource = () => {
+    if (audioRef.current && fallbackAudioSrc) {
+      audioRef.current.src = fallbackAudioSrc;
+      setCurrentAudioSrc(fallbackAudioSrc);
+      setError(false);
+      
+      try {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+              toast.success("Usando fuente de audio alternativa");
+            })
+            .catch(e => {
+              console.error("Error playing alternative audio:", e);
+              setError(true);
+              setIsPlaying(false);
+              toast.error("Error al reproducir fuente alternativa");
+            });
+        }
+      } catch (e) {
+        console.error("Exception playing alternative audio:", e);
+        setError(true);
+        setIsPlaying(false);
+      }
+    } else {
+      toast.error("No hay fuente alternativa disponible");
+    }
+  };
+  
   // Reset error when audio source changes
   useEffect(() => {
     setError(false);
     setUseSpotify(false);
+    setCurrentAudioSrc(audioSrc);
   }, [audioSrc]);
   
   // Update time display and progress
@@ -124,6 +162,12 @@ export const useAudioPlayer = ({
       console.error("Audio error:", e);
       setError(true);
       setIsPlaying(false);
+      
+      // Try fallback if available
+      if (fallbackAudioSrc && currentAudioSrc !== fallbackAudioSrc) {
+        toast.info("Intentando fuente alternativa...");
+        tryAlternativeSource();
+      }
     };
     
     if (audio) {
@@ -140,7 +184,7 @@ export const useAudioPlayer = ({
         audio.removeEventListener('error', handleError as EventListener);
       }
     };
-  }, [onTimeUpdate, volume]);
+  }, [onTimeUpdate, volume, fallbackAudioSrc, currentAudioSrc]);
 
   return {
     audioRef,
@@ -158,6 +202,8 @@ export const useAudioPlayer = ({
     skipToPoint,
     skipToPrevFibonacciPoint,
     skipToNextFibonacciPoint,
-    switchToSpotify
+    switchToSpotify,
+    tryAlternativeSource,
+    currentAudioSrc
   };
 };

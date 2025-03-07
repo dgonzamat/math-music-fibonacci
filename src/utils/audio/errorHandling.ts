@@ -44,7 +44,25 @@ export const togglePlayWithErrorHandling = (
             })
             .catch(e => {
               console.error("Error playing audio:", e);
-              if (spotifyUri) {
+              // Try playing the fallback source if available
+              if (audioRef.current && audioRef.current.src.includes('s3.amazonaws.com')) {
+                // Try a fallback audio source with cors enabled
+                const fallbackUrl = audioRef.current.src.replace('s3.amazonaws.com', 's3.us-east-1.amazonaws.com');
+                audioRef.current.src = fallbackUrl;
+                
+                const retryPromise = audioRef.current.play();
+                if (retryPromise !== undefined) {
+                  retryPromise
+                    .then(() => {
+                      setIsPlaying(true);
+                    })
+                    .catch(retryError => {
+                      console.error("Error playing fallback audio:", retryError);
+                      setError(true);
+                      setIsPlaying(false);
+                    });
+                }
+              } else if (spotifyUri) {
                 setError(true);
                 setUseSpotify(true);
                 setIsPlaying(false);

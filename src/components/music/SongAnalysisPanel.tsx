@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ToolSong } from '@/utils/music';
-import { Clock, Sigma } from 'lucide-react';
+import { Clock, Sigma, Music } from 'lucide-react';
 import AudioPlayer from '../AudioPlayer';
 
 interface SongAnalysisPanelProps {
@@ -23,6 +23,11 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Function to generate YouTube alternative links
+  const generateYouTubeLink = (title: string) => {
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(`tool ${title} full song`)}`;
+  };
+
   return (
     <div className="glass-panel p-6 mb-6">
       <div className="flex items-start justify-between mb-4">
@@ -38,7 +43,7 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
       
       <p className="text-muted-foreground mb-4">{song.description}</p>
       
-      {(song.audioSrc || song.spotifyUri) && (
+      {(song.audioSrc || song.spotifyUri) ? (
         <div className="mb-6">
           <AudioPlayer 
             audioSrc={song.audioSrc || ''}
@@ -47,6 +52,21 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
             onTimeUpdate={onTimeUpdate}
             spotifyUri={song.spotifyUri}
           />
+        </div>
+      ) : (
+        <div className="mb-6 p-4 bg-dark-tertiary/50 rounded-lg flex flex-col items-center justify-center">
+          <p className="text-muted-foreground mb-3">Audio no disponible. Escuchar en servicios externos:</p>
+          <div className="flex gap-2">
+            <a 
+              href={generateYouTubeLink(song.title)} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-red-500 text-white px-3 py-2 rounded-md text-sm flex items-center"
+            >
+              <Music className="w-4 h-4 mr-2" />
+              Buscar en YouTube
+            </a>
+          </div>
         </div>
       )}
       
