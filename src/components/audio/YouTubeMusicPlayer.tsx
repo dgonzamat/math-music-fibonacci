@@ -3,16 +3,19 @@ import React, { useEffect, useRef } from 'react';
 import { Music, ExternalLink, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import FibonacciPoints from './FibonacciPoints';
+import PlayerTester from './PlayerTester';
 import { usePlayerContext } from '@/contexts/PlayerContext';
 
 interface YouTubeMusicPlayerProps {
   fibonacciPoints: number[];
   songId?: string;
+  testMode?: boolean;
 }
 
 const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
   fibonacciPoints,
-  songId
+  songId,
+  testMode = false
 }) => {
   const { 
     formatTime, 
@@ -31,6 +34,8 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
   const playerRef = useRef<any>(null);
   // Reference to store the timer for polling player time
   const timeUpdateIntervalRef = useRef<number | null>(null);
+  // Track external link clicks for testing
+  const linkClickTrackerRef = useRef<boolean>(false);
   
   // Update current song in context when songId changes
   useEffect(() => {
@@ -162,6 +167,16 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
     }
   }, [currentTime]);
 
+  // Track external link clicks
+  const handleExternalLinkClick = () => {
+    linkClickTrackerRef.current = true;
+    
+    if (testMode) {
+      toast.success("Test: External YouTube link clicked");
+      console.log("✓ External YouTube link clicked");
+    }
+  };
+
   return (
     <div className="bg-purple-500/10 p-3 rounded-lg mb-4">
       <div className="flex items-center justify-between text-purple-400 mb-2">
@@ -175,6 +190,8 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
           rel="noopener noreferrer"
           className="flex items-center text-xs text-purple-300 hover:text-purple-100 transition-colors"
           aria-label="Ver en YouTube"
+          onClick={handleExternalLinkClick}
+          data-testid="external-youtube-link"
         >
           <ExternalLink className="w-3 h-3 mr-1" />
           <span>Ver en YouTube</span>
@@ -190,6 +207,8 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full text-xs flex items-center transition-colors"
+              onClick={handleExternalLinkClick}
+              data-testid="external-youtube-error-link"
             >
               <ExternalLink className="w-3 h-3 mr-1" />
               Ver en YouTube
@@ -215,6 +234,9 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
           formatTime={formatTime}
         />
       </div>
+      
+      {/* Include the tester component (invisible) */}
+      <PlayerTester enableTestMode={testMode} />
     </div>
   );
 };

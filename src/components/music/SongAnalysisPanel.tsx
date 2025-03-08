@@ -3,19 +3,22 @@ import React from 'react';
 import { ToolSong } from '@/utils/music';
 import { Clock, Sigma, Music, Video, ExternalLink } from 'lucide-react';
 import AudioPlayer from '../AudioPlayer';
+import { toast } from 'sonner';
 
 interface SongAnalysisPanelProps {
   song: ToolSong;
   analysis: { patterns: string[], explanation: string } | null;
   currentTime: number;
   onTimeUpdate: (time: number) => void;
+  testMode?: boolean;
 }
 
 const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
   song,
   analysis,
   currentTime,
-  onTimeUpdate
+  onTimeUpdate,
+  testMode = false
 }) => {
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -34,6 +37,14 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
         return 'https://www.youtube.com/watch?v=GIuZUCpm9hc';
       default:
         return `https://www.youtube.com/results?search_query=${encodeURIComponent(`tool ${song.title} full song`)}`;
+    }
+  };
+
+  // For testing external links
+  const handleExternalLinkClick = () => {
+    if (testMode) {
+      console.log(`✓ External link to YouTube for song ${song.title} clicked`);
+      toast.success(`Test: External link for ${song.title} clicked`);
     }
   };
 
@@ -60,6 +71,7 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
           onTimeUpdate={onTimeUpdate}
           spotifyUri={song.spotifyUri}
           songId={song.id}
+          testMode={testMode}
         />
       </div>
       
@@ -69,7 +81,7 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
       {analysis && (
         <ul className="space-y-2">
           {analysis.patterns.map((pattern, i) => (
-            <li key={i} className="flex items-start">
+            <li key={i} className="flex items-start" data-testid={`fibonacci-pattern-${i}`}>
               <Sigma className="w-4 h-4 text-golden mt-1 mr-2 flex-shrink-0" />
               <span className="text-silver">{pattern}</span>
             </li>

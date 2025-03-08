@@ -11,6 +11,7 @@ interface AudioPlayerProps {
   onTimeUpdate?: (currentTime: number) => void;
   spotifyUri?: string;
   songId?: string;
+  testMode?: boolean;
 }
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({
@@ -19,7 +20,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   fibonacciPoints,
   onTimeUpdate,
   spotifyUri,
-  songId
+  songId,
+  testMode = false
 }) => {
   return (
     <div className="audio-player glass-panel p-4 rounded-lg">
@@ -27,6 +29,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         <YouTubeMusicPlayer
           fibonacciPoints={fibonacciPoints}
           songId={songId}
+          testMode={testMode}
         />
       </PlayerProvider>
     </div>

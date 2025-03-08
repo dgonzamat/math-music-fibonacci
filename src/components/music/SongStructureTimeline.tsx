@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { SongSection } from '@/utils/music';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface TimelinePoint {
   timePoints: number[];
@@ -15,17 +16,54 @@ interface SongStructureTimelineProps {
     goldenRatioPoint: number;
   };
   currentTime: number;
+  testMode?: boolean;
 }
 
 const SongStructureTimeline: React.FC<SongStructureTimelineProps> = ({
   visualData,
   selectedSong,
-  currentTime
+  currentTime,
+  testMode = false
 }) => {
+  // Track which timeline points have been clicked for testing
+  const clickedPointsRef = useRef<Set<number>>(new Set());
+  // Track which sections have been clicked for testing
+  const clickedSectionsRef = useRef<Set<string>>(new Set());
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleTimelinePointClick = (point: number) => {
+    const audioElement = document.querySelector('audio');
+    if (audioElement) {
+      audioElement.currentTime = point;
+      audioElement.play();
+    }
+    
+    // For testing
+    if (testMode) {
+      clickedPointsRef.current.add(point);
+      console.log(`✓ Timeline point ${formatTime(point)} clicked`);
+      toast.info(`Test: Navigated to timeline point ${formatTime(point)}`);
+    }
+  };
+
+  const handleSectionClick = (section: SongSection) => {
+    const audioElement = document.querySelector('audio');
+    if (audioElement) {
+      audioElement.currentTime = section.startTime;
+      audioElement.play();
+    }
+    
+    // For testing
+    if (testMode) {
+      clickedSectionsRef.current.add(section.name);
+      console.log(`✓ Section "${section.name}" clicked (${formatTime(section.startTime)})`);
+      toast.info(`Test: Navigated to section ${section.name}`);
+    }
   };
 
   if (!visualData) return null;
@@ -56,13 +94,9 @@ const SongStructureTimeline: React.FC<SongStructureTimelineProps> = ({
                     ? "bg-golden animate-pulse-soft" 
                     : "bg-silver/50"
                 )}
-                onClick={() => {
-                  const audioElement = document.querySelector('audio');
-                  if (audioElement) {
-                    audioElement.currentTime = point;
-                    audioElement.play();
-                  }
-                }}
+                onClick={() => handleTimelinePointClick(point)}
+                data-testid={`timeline-point-${i}`}
+                data-time={point}
               />
               <div className="absolute top-5 left-1/2 transform -translate-x-1/2 text-xs whitespace-nowrap">
                 <span className={cn(
@@ -79,11 +113,13 @@ const SongStructureTimeline: React.FC<SongStructureTimelineProps> = ({
         <div 
           className="absolute top-1/2 w-1 h-8 bg-white/80 transform -translate-y-1/2"
           style={{ left: `${(currentTime / selectedSong.duration) * 100}%` }}
+          data-testid="timeline-current-position"
         />
         
         <div 
           className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 gold-shimmer"
           style={{ left: `${(selectedSong.goldenRatioPoint / selectedSong.duration) * 100}%` }}
+          data-testid="golden-ratio-point"
         >
           <div className="w-4 h-4 rounded-full bg-golden/30 backdrop-blur-sm border border-golden/50" />
           <div className="absolute top-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
@@ -116,13 +152,9 @@ const SongStructureTimeline: React.FC<SongStructureTimelineProps> = ({
                   left: `${left}%`, 
                   width: `${width}%` 
                 }}
-                onClick={() => {
-                  const audioElement = document.querySelector('audio');
-                  if (audioElement) {
-                    audioElement.currentTime = section.startTime;
-                    audioElement.play();
-                  }
-                }}
+                onClick={() => handleSectionClick(section)}
+                data-testid={`song-section-${i}`}
+                data-section-name={section.name}
               >
                 <div className="p-2 h-full flex flex-col justify-center overflow-hidden cursor-pointer">
                   <div className="flex items-center justify-between">
