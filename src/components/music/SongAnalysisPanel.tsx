@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ToolSong } from '@/utils/music';
-import { Clock, Sigma, Music } from 'lucide-react';
+import { Clock, Sigma, Music, Video, ExternalLink } from 'lucide-react';
 import AudioPlayer from '../AudioPlayer';
 
 interface SongAnalysisPanelProps {
@@ -23,9 +23,18 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Function to generate YouTube alternative links
-  const generateYouTubeLink = (title: string) => {
-    return `https://www.youtube.com/results?search_query=${encodeURIComponent(`tool ${title} full song`)}`;
+  // Function to generate YouTube link based on song ID
+  const getYouTubeLink = (songId: string): string => {
+    switch (songId) {
+      case 'lateralus':
+        return 'https://www.youtube.com/watch?v=Y7JG63IuaWs';
+      case 'schism':
+        return 'https://www.youtube.com/watch?v=80RtBeB61LE';
+      case 'fibonacci': // Forty Six & 2
+        return 'https://www.youtube.com/watch?v=GIuZUCpm9hc';
+      default:
+        return `https://www.youtube.com/results?search_query=${encodeURIComponent(`tool ${song.title} full song`)}`;
+    }
   };
 
   return (
@@ -43,33 +52,16 @@ const SongAnalysisPanel: React.FC<SongAnalysisPanelProps> = ({
       
       <p className="text-muted-foreground mb-4">{song.description}</p>
       
-      {(song.audioSrc || song.spotifyUri) ? (
-        <div className="mb-6">
-          <AudioPlayer 
-            audioSrc={song.audioSrc || ''}
-            songDuration={song.duration}
-            fibonacciPoints={song.fibonacciMoments}
-            onTimeUpdate={onTimeUpdate}
-            spotifyUri={song.spotifyUri}
-            songId={song.id}
-          />
-        </div>
-      ) : (
-        <div className="mb-6 p-4 bg-dark-tertiary/50 rounded-lg flex flex-col items-center justify-center">
-          <p className="text-muted-foreground mb-3">Audio no disponible. Escuchar en servicios externos:</p>
-          <div className="flex gap-2">
-            <a 
-              href={generateYouTubeLink(song.title)} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-red-500 text-white px-3 py-2 rounded-md text-sm flex items-center"
-            >
-              <Music className="w-4 h-4 mr-2" />
-              Buscar en YouTube
-            </a>
-          </div>
-        </div>
-      )}
+      <div className="mb-6">
+        <AudioPlayer 
+          audioSrc={song.audioSrc || ''}
+          songDuration={song.duration}
+          fibonacciPoints={song.fibonacciMoments}
+          onTimeUpdate={onTimeUpdate}
+          spotifyUri={song.spotifyUri}
+          songId={song.id}
+        />
+      </div>
       
       <div className="fibonacci-divider" />
       

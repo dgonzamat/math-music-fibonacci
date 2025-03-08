@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { Music, ExternalLink } from 'lucide-react';
+import { Music, ExternalLink, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import FibonacciPoints from './FibonacciPoints';
 
-interface SpotifyPlayerProps {
+interface YouTubeMusicPlayerProps {
   formatTime: (seconds: number) => string;
   fibonacciPoints: number[];
   currentTime: number;
@@ -12,7 +12,7 @@ interface SpotifyPlayerProps {
   songId?: string;
 }
 
-const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
+const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
   formatTime,
   fibonacciPoints,
   currentTime,
@@ -22,8 +22,8 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
   const [playerLoaded, setPlayerLoaded] = useState(false);
   const [playerError, setPlayerError] = useState(false);
   
-  // Get the correct YouTube URL based on the song ID
-  const getYouTubeUrl = () => {
+  // Get the direct YouTube embed URL based on the song ID
+  const getYouTubeEmbedUrl = () => {
     switch (songId) {
       case 'lateralus':
         return 'https://www.youtube.com/embed/Y7JG63IuaWs';
@@ -37,47 +37,71 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
     }
   };
   
+  // Get the full YouTube URL for external link
+  const getYouTubeFullUrl = () => {
+    switch (songId) {
+      case 'lateralus':
+        return 'https://www.youtube.com/watch?v=Y7JG63IuaWs';
+      case 'schism':
+        return 'https://www.youtube.com/watch?v=80RtBeB61LE';
+      case 'fibonacci': // Forty Six & 2
+        return 'https://www.youtube.com/watch?v=GIuZUCpm9hc';
+      default:
+        return 'https://www.youtube.com/watch?v=Y7JG63IuaWs';
+    }
+  };
+  
   // Handle when the iframe is loaded
   const handlePlayerLoad = () => {
     setPlayerLoaded(true);
     setPlayerError(false);
-    toast.success("Reproductor alternativo cargado");
+    toast.success("Reproductor de YouTube cargado");
   };
   
   // Handle load error
   const handlePlayerError = () => {
-    console.error("Error loading alternative player iframe");
+    console.error("Error loading YouTube player iframe");
     setPlayerError(true);
     setPlayerLoaded(false);
-    toast.error("Error al cargar el reproductor alternativo");
+    toast.error("Error al cargar el reproductor de YouTube");
   };
 
   return (
     <div className="bg-purple-500/10 p-3 rounded-lg mb-4">
-      <div className="flex items-center text-purple-400 mb-2">
-        <Music className="w-5 h-5 mr-2" />
-        <span className="font-medium">Reproductor alternativo</span>
+      <div className="flex items-center justify-between text-purple-400 mb-2">
+        <div className="flex items-center">
+          <Video className="w-5 h-5 mr-2" />
+          <span className="font-medium">Reproductor de YouTube</span>
+        </div>
+        <a 
+          href={getYouTubeFullUrl()} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center text-xs text-purple-300 hover:text-purple-100 transition-colors"
+          aria-label="Ver en YouTube"
+        >
+          <ExternalLink className="w-3 h-3 mr-1" />
+          <span>Ver en YouTube</span>
+        </a>
       </div>
       
-      <div className="alternative-player w-full" style={{ minHeight: "80px" }}>
+      <div className="youtube-player w-full" style={{ minHeight: "80px" }}>
         {playerError ? (
           <div className="flex flex-col items-center justify-center h-20 bg-red-900/20 rounded-md p-2">
-            <p className="text-sm text-red-400 mb-2">Error al cargar el reproductor alternativo</p>
-            <div className="flex gap-2">
-              <a 
-                href={getYouTubeUrl()}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-red-500 text-white px-3 py-1 rounded-full text-xs flex items-center"
-              >
-                <ExternalLink className="w-3 h-3 mr-1" />
-                Ver en YouTube
-              </a>
-            </div>
+            <p className="text-sm text-red-400 mb-2">Error al cargar el reproductor de YouTube</p>
+            <a 
+              href={getYouTubeFullUrl()}
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full text-xs flex items-center transition-colors"
+            >
+              <ExternalLink className="w-3 h-3 mr-1" />
+              Ver en YouTube
+            </a>
           </div>
         ) : (
           <iframe 
-            src={getYouTubeUrl()} 
+            src={getYouTubeEmbedUrl()} 
             width="100%" 
             height="180" 
             frameBorder="0" 
@@ -87,17 +111,18 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
             onLoad={handlePlayerLoad}
             onError={handlePlayerError}
             className={`rounded-md transition-opacity duration-300 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
+            title="YouTube music player"
           ></iframe>
         )}
         
         {!playerLoaded && !playerError && (
           <div className="flex justify-center items-center h-20 bg-dark-tertiary/50 rounded-md animate-pulse">
-            <Music className="w-6 h-6 text-purple-400 animate-bounce" />
+            <Video className="w-6 h-6 text-purple-400 animate-bounce" />
           </div>
         )}
       </div>
       
-      {/* Fibonacci points for alternative player */}
+      {/* Fibonacci points for YouTube player */}
       <div className="mt-4">
         <FibonacciPoints
           fibonacciPoints={fibonacciPoints}
@@ -110,4 +135,4 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
   );
 };
 
-export default SpotifyPlayer;
+export default YouTubeMusicPlayer;
