@@ -1,8 +1,7 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import YouTubeMusicPlayer from './audio/YouTubeMusicPlayer';
 import ErrorDisplay from './audio/ErrorDisplay';
-import { toast } from 'sonner';
 import { PlayerProvider } from '@/contexts/PlayerContext';
 
 interface AudioPlayerProps {

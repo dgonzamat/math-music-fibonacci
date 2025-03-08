@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Music, ExternalLink, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import FibonacciPoints from './FibonacciPoints';
@@ -17,6 +17,8 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
   const { 
     formatTime, 
     currentTime, 
+    setCurrentTime,
+    setIsPlaying,
     skipToPoint, 
     playerLoaded, 
     setPlayerLoaded, 
@@ -25,6 +27,11 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
     setCurrentSongId
   } = usePlayerContext();
   
+  // Reference to store YouTube player instance
+  const playerRef = useRef<any>(null);
+  // Reference to store the timer for polling player time
+  const timeUpdateIntervalRef = useRef<number | null>(null);
+  
   // Update current song in context when songId changes
   useEffect(() => {
     if (songId) {
@@ -32,18 +39,102 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
     }
   }, [songId, setCurrentSongId]);
   
-  // Get the direct YouTube embed URL based on the song ID
-  const getYouTubeEmbedUrl = () => {
+  // Setup YouTube API and player
+  useEffect(() => {
+    // Create YouTube API script if it doesn't exist
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+
+    // Initialize player when API is ready
+    window.onYouTubeIframeAPIReady = initializePlayer;
+
+    // If YouTube API is already loaded, initialize player directly
+    if (window.YT && window.YT.Player) {
+      initializePlayer();
+    }
+
+    return () => {
+      // Clean up interval on unmount
+      if (timeUpdateIntervalRef.current) {
+        window.clearInterval(timeUpdateIntervalRef.current);
+      }
+    };
+  }, [songId]);
+
+  // Initialize the YouTube player
+  const initializePlayer = () => {
+    if (!songId) return;
+    
+    const videoId = getYouTubeVideoId(songId);
+    const playerContainer = document.getElementById('youtube-player');
+    
+    if (!playerContainer) return;
+    
+    // Create new player instance
+    playerRef.current = new window.YT.Player('youtube-player', {
+      videoId: videoId,
+      height: '180',
+      width: '100%',
+      playerVars: {
+        autoplay: 0,
+        modestbranding: 1,
+        rel: 0
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange,
+        'onError': onPlayerError
+      }
+    });
+  };
+
+  // Handle player ready event
+  const onPlayerReady = (event: any) => {
+    setPlayerLoaded(true);
+    setPlayerError(false);
+    toast.success("Reproductor de YouTube cargado");
+    
+    // Start time update interval
+    if (timeUpdateIntervalRef.current) {
+      window.clearInterval(timeUpdateIntervalRef.current);
+    }
+    
+    timeUpdateIntervalRef.current = window.setInterval(() => {
+      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
+        const currentTime = playerRef.current.getCurrentTime();
+        setCurrentTime(currentTime);
+      }
+    }, 250); // Update 4 times per second
+  };
+
+  // Handle player state changes
+  const onPlayerStateChange = (event: any) => {
+    setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
+  };
+
+  // Handle player errors
+  const onPlayerError = (event: any) => {
+    console.error("YouTube player error:", event);
+    setPlayerError(true);
+    setPlayerLoaded(false);
+    toast.error("Error al cargar el reproductor de YouTube");
+  };
+  
+  // Get the YouTube video ID based on the song ID
+  const getYouTubeVideoId = (songId: string): string => {
     switch (songId) {
       case 'lateralus':
-        return 'https://www.youtube.com/embed/Y7JG63IuaWs';
+        return 'Y7JG63IuaWs';
       case 'schism':
-        return 'https://www.youtube.com/embed/80RtBeB61LE';
+        return '80RtBeB61LE';
       case 'fibonacci': // Forty Six & 2
-        return 'https://www.youtube.com/embed/GIuZUCpm9hc';
+        return 'GIuZUCpm9hc';
       default:
-        // Fallback to Lateralus if no match
-        return 'https://www.youtube.com/embed/Y7JG63IuaWs';
+        return 'Y7JG63IuaWs'; // Default to Lateralus
     }
   };
   
@@ -60,21 +151,16 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
         return 'https://www.youtube.com/watch?v=Y7JG63IuaWs';
     }
   };
-  
-  // Handle when the iframe is loaded
-  const handlePlayerLoad = () => {
-    setPlayerLoaded(true);
-    setPlayerError(false);
-    toast.success("Reproductor de YouTube cargado");
-  };
-  
-  // Handle load error
-  const handlePlayerError = () => {
-    console.error("Error loading YouTube player iframe");
-    setPlayerError(true);
-    setPlayerLoaded(false);
-    toast.error("Error al cargar el reproductor de YouTube");
-  };
+
+  // Jump to specific time point
+  useEffect(() => {
+    // When skipToPoint is called from FibonacciPoints or elsewhere
+    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
+      if (Math.abs(playerRef.current.getCurrentTime() - currentTime) > 0.5) {
+        playerRef.current.seekTo(currentTime, true);
+      }
+    }
+  }, [currentTime]);
 
   return (
     <div className="bg-purple-500/10 p-3 rounded-lg mb-4">
@@ -110,19 +196,7 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
             </a>
           </div>
         ) : (
-          <iframe 
-            src={getYouTubeEmbedUrl()} 
-            width="100%" 
-            height="180" 
-            frameBorder="0" 
-            allowFullScreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            loading="lazy"
-            onLoad={handlePlayerLoad}
-            onError={handlePlayerError}
-            className={`rounded-md transition-opacity duration-300 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
-            title="YouTube music player"
-          ></iframe>
+          <div id="youtube-player" className={`rounded-md transition-opacity duration-300 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}></div>
         )}
         
         {!playerLoaded && !playerError && (
@@ -144,5 +218,13 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
     </div>
   );
 };
+
+// Add global type for YouTube API
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
 
 export default YouTubeMusicPlayer;

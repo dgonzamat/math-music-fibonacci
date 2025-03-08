@@ -41,6 +41,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({
   const [playerLoaded, setPlayerLoaded] = useState(false);
   const [playerError, setPlayerError] = useState(false);
   const [currentSongId, setCurrentSongId] = useState<string | undefined>(undefined);
+  const [lastSkipTime, setLastSkipTime] = useState<number>(0);
 
   // Format time function
   const formatTime = (seconds: number): string => {
@@ -49,18 +50,22 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
   
-  // Skip to specific time point (for UI updates)
+  // Skip to specific time point (for UI updates and YouTube API)
   const skipToPoint = (time: number) => {
+    setLastSkipTime(Date.now());
     setCurrentTime(time);
     if (onTimeUpdate) onTimeUpdate(time);
   };
   
   // Update parent component when time changes
   useEffect(() => {
-    if (onTimeUpdate) {
-      onTimeUpdate(currentTime);
+    // Avoid duplicate updates when skipToPoint was just called
+    if (Date.now() - lastSkipTime > 300) {
+      if (onTimeUpdate) {
+        onTimeUpdate(currentTime);
+      }
     }
-  }, [currentTime, onTimeUpdate]);
+  }, [currentTime, onTimeUpdate, lastSkipTime]);
 
   const value = {
     isPlaying,
