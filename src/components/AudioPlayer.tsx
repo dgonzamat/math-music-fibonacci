@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
-import YouTubeMusicPlayer from './audio/SpotifyPlayer';
+import React, { useEffect } from 'react';
+import YouTubeMusicPlayer from './audio/YouTubeMusicPlayer';
 import ErrorDisplay from './audio/ErrorDisplay';
 import { toast } from 'sonner';
+import { PlayerProvider } from '@/contexts/PlayerContext';
 
 interface AudioPlayerProps {
   audioSrc: string;
@@ -21,37 +22,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   spotifyUri,
   songId
 }) => {
-  // State to track if we're using YouTube
-  const [useYouTube, setUseYouTube] = useState(true);
-  const [currentTime, setCurrentTime] = useState(0);
-  
-  // Format time function for timestamps
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-  
-  // Skip to specific time point in the song (for YouTube this is visual only)
-  const skipToPoint = (time: number) => {
-    setCurrentTime(time);
-    if (onTimeUpdate) onTimeUpdate(time);
-  };
-  
-  // Always use YouTube player on mount
-  useEffect(() => {
-    setUseYouTube(true);
-  }, []);
-  
   return (
     <div className="audio-player glass-panel p-4 rounded-lg">
-      <YouTubeMusicPlayer
-        formatTime={formatTime}
-        fibonacciPoints={fibonacciPoints}
-        currentTime={currentTime}
-        skipToPoint={skipToPoint}
-        songId={songId}
-      />
+      <PlayerProvider onTimeUpdate={onTimeUpdate}>
+        <YouTubeMusicPlayer
+          fibonacciPoints={fibonacciPoints}
+          songId={songId}
+        />
+      </PlayerProvider>
     </div>
   );
 };

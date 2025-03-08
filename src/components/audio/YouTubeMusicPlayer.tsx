@@ -1,26 +1,36 @@
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Music, ExternalLink, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import FibonacciPoints from './FibonacciPoints';
+import { usePlayerContext } from '@/contexts/PlayerContext';
 
 interface YouTubeMusicPlayerProps {
-  formatTime: (seconds: number) => string;
   fibonacciPoints: number[];
-  currentTime: number;
-  skipToPoint: (time: number) => void;
   songId?: string;
 }
 
 const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
-  formatTime,
   fibonacciPoints,
-  currentTime,
-  skipToPoint,
   songId
 }) => {
-  const [playerLoaded, setPlayerLoaded] = useState(false);
-  const [playerError, setPlayerError] = useState(false);
+  const { 
+    formatTime, 
+    currentTime, 
+    skipToPoint, 
+    playerLoaded, 
+    setPlayerLoaded, 
+    playerError, 
+    setPlayerError,
+    setCurrentSongId
+  } = usePlayerContext();
+  
+  // Update current song in context when songId changes
+  useEffect(() => {
+    if (songId) {
+      setCurrentSongId(songId);
+    }
+  }, [songId, setCurrentSongId]);
   
   // Get the direct YouTube embed URL based on the song ID
   const getYouTubeEmbedUrl = () => {
