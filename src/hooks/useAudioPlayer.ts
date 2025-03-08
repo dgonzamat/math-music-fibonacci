@@ -1,19 +1,8 @@
 
-import { useState, useRef, useEffect } from 'react';
-import { formatTime } from '@/utils/audio/formatTime';
-import { 
-  skipToPoint as skipToPointUtil,
-  skipToPrevFibonacciPoint as skipToPrevUtil,
-  skipToNextFibonacciPoint as skipToNextUtil 
-} from '@/utils/audio/playbackControls';
-import {
-  switchToSpotify as switchToSpotifyUtil,
-  togglePlayWithErrorHandling
-} from '@/utils/audio/errorHandling';
-import {
-  handleVolumeChange as handleVolumeChangeUtil,
-  toggleMute as toggleMuteUtil
-} from '@/utils/audio/volumeControls';
+import { useState, useRef } from 'react';
+import { useAudioTime } from './useAudioTime';
+import { useAudioVolume } from './useAudioVolume';
+import { useFibonacciNavigation } from './useFibonacciNavigation';
 import { toast } from 'sonner';
 
 interface UseAudioPlayerProps {
@@ -34,73 +23,82 @@ export const useAudioPlayer = ({
   fallbackAudioSrc
 }: UseAudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.7);
   const [error, setError] = useState(false);
-  const [useSpotify, setUseSpotify] = useState(false);
+  const [useYouTube, setUseYouTube] = useState(false);
   const [currentAudioSrc, setCurrentAudioSrc] = useState(audioSrc);
   const audioRef = useRef<HTMLAudioElement>(null);
   
-  // Handle play/pause
-  const togglePlay = () => {
-    togglePlayWithErrorHandling(
-      audioRef,
-      isPlaying,
-      setIsPlaying,
-      setError,
-      setUseSpotify,
-      useSpotify,
-      spotifyUri
-    );
-  };
+  // Use the smaller hooks
+  const { currentTime, setCurrentTime, handleSeek, formatTime } = useAudioTime({ 
+    audioRef, 
+    onTimeUpdate 
+  });
   
-  // Switch to Spotify
-  const switchToSpotify = () => {
-    switchToSpotifyUtil(setError, setUseSpotify);
-    toast.info("Cambiando a reproductor alternativo");
-  };
+  const { isMuted, volume, toggleMute, handleVolumeChange } = useAudioVolume({ 
+    audioRef 
+  });
   
-  // Handle mute/unmute
-  const toggleMute = () => {
-    toggleMuteUtil(audioRef, isMuted, setIsMuted);
-  };
-  
-  // Handle volume change
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    handleVolumeChangeUtil(audioRef, setVolume, newVolume);
-  };
-  
-  // Handle seeking
-  const handleSeek = (seekTime: number) => {
+  // Custom skipToPoint function for YouTube integration
+  const skipToPoint = (time: number) => {
+    // If using YouTube, just update the time for UI display
+    if (useYouTube) {
+      setCurrentTime(time);
+      return;
+    }
+    
     if (audioRef.current) {
-      audioRef.current.currentTime = seekTime;
-      setCurrentTime(seekTime);
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
     }
   };
   
-  // Skip to specific Fibonacci point
-  const skipToPoint = (time: number) => {
-    skipToPointUtil(
-      audioRef,
-      setCurrentTime,
-      setIsPlaying,
-      setError,
-      setUseSpotify,
-      time,
-      useSpotify,
-      spotifyUri
-    );
+  const { skipToPrevFibonacciPoint, skipToNextFibonacciPoint } = useFibonacciNavigation({
+    currentTime,
+    fibonacciPoints,
+    skipToPoint,
+    useYouTube
+  });
+  
+  // Switch to YouTube
+  const switchToYouTube = () => {
+    setUseYouTube(true);
+    setError(false);
+    toast.info("Cambiando a reproductor alternativo");
   };
   
-  // Skip to previous/next Fibonacci point
-  const skipToPrevFibonacciPoint = () => {
-    skipToPrevUtil(currentTime, fibonacciPoints, skipToPoint, useSpotify);
-  };
-  
-  const skipToNextFibonacciPoint = () => {
-    skipToNextUtil(currentTime, fibonacciPoints, skipToPoint, useSpotify);
+  // Toggle play/pause
+  const togglePlay = () => {
+    // For YouTube, just toggle the state
+    if (useYouTube) {
+      setIsPlaying(!isPlaying);
+      return;
+    }
+    
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        try {
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                setIsPlaying(true);
+              })
+              .catch(e => {
+                console.error("Error playing audio:", e);
+                setError(true);
+                setIsPlaying(false);
+              });
+          }
+        } catch (e) {
+          console.error("Exception playing audio:", e);
+          setError(true);
+          setIsPlaying(false);
+        }
+      }
+    }
   };
   
   // Try alternative audio source
@@ -134,57 +132,6 @@ export const useAudioPlayer = ({
       toast.error("No hay fuente alternativa disponible");
     }
   };
-  
-  // Reset error when audio source changes
-  useEffect(() => {
-    setError(false);
-    setUseSpotify(false);
-    setCurrentAudioSrc(audioSrc);
-  }, [audioSrc]);
-  
-  // Update time display and progress
-  useEffect(() => {
-    const audio = audioRef.current;
-    
-    const handleTimeUpdate = () => {
-      if (audio) {
-        setCurrentTime(audio.currentTime);
-        if (onTimeUpdate) onTimeUpdate(audio.currentTime);
-      }
-    };
-    
-    const handleEnded = () => {
-      setIsPlaying(false);
-      setCurrentTime(0);
-    };
-    
-    const handleError = (e: ErrorEvent) => {
-      console.error("Audio error:", e);
-      setError(true);
-      setIsPlaying(false);
-      
-      // Try fallback if available
-      if (fallbackAudioSrc && currentAudioSrc !== fallbackAudioSrc) {
-        toast.info("Intentando fuente alternativa...");
-        tryAlternativeSource();
-      }
-    };
-    
-    if (audio) {
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-      audio.addEventListener('ended', handleEnded);
-      audio.addEventListener('error', handleError as EventListener);
-      audio.volume = volume;
-    }
-    
-    return () => {
-      if (audio) {
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('error', handleError as EventListener);
-      }
-    };
-  }, [onTimeUpdate, volume, fallbackAudioSrc, currentAudioSrc]);
 
   return {
     audioRef,
@@ -193,7 +140,7 @@ export const useAudioPlayer = ({
     isMuted,
     volume,
     error,
-    useSpotify,
+    useYouTube,
     formatTime,
     togglePlay,
     toggleMute,
@@ -202,7 +149,7 @@ export const useAudioPlayer = ({
     skipToPoint,
     skipToPrevFibonacciPoint,
     skipToNextFibonacciPoint,
-    switchToSpotify,
+    switchToYouTube,
     tryAlternativeSource,
     currentAudioSrc
   };

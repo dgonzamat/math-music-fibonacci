@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import YouTubeMusicPlayer from './audio/SpotifyPlayer';
 import ErrorDisplay from './audio/ErrorDisplay';
 import { toast } from 'sonner';
@@ -23,7 +22,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   songId
 }) => {
   // State to track if we're using YouTube
-  const [useYouTube, setUseYouTube] = useState(false);
+  const [useYouTube, setUseYouTube] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   
   // Format time function for timestamps
@@ -37,12 +36,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const skipToPoint = (time: number) => {
     setCurrentTime(time);
     if (onTimeUpdate) onTimeUpdate(time);
-  };
-  
-  // Switch to YouTube player
-  const switchToYouTube = () => {
-    setUseYouTube(true);
-    toast.success("Usando reproductor de YouTube");
   };
   
   // Always use YouTube player on mount
