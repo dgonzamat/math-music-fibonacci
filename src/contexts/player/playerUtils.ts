@@ -1,0 +1,14 @@
+
+/**
+ * Utility functions for player functionality
+ */
+
+/**
+ * Format seconds into a MM:SS format
+ */
+export const formatTime = (seconds: number): string => {
+  if (isNaN(seconds)) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
