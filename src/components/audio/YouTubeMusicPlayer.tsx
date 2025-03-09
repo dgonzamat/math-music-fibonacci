@@ -51,7 +51,7 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
       const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
     }
 
     // Initialize player when API is ready
@@ -79,22 +79,28 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
     
     if (!playerContainer) return;
     
-    // Create new player instance
-    playerRef.current = new window.YT.Player('youtube-player', {
-      videoId: videoId,
-      height: '180',
-      width: '100%',
-      playerVars: {
-        autoplay: 0,
-        modestbranding: 1,
-        rel: 0
-      },
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange,
-        'onError': onPlayerError
-      }
-    });
+    try {
+      // Create new player instance
+      playerRef.current = new window.YT.Player('youtube-player', {
+        videoId: videoId,
+        height: '180',
+        width: '100%',
+        playerVars: {
+          autoplay: 0,
+          modestbranding: 1,
+          rel: 0
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
+        }
+      });
+    } catch (error) {
+      console.error("Error initializing YouTube player:", error);
+      setPlayerError(true);
+      toast.error("Error al inicializar el reproductor de YouTube");
+    }
   };
 
   // Handle player ready event
@@ -110,15 +116,21 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
     
     timeUpdateIntervalRef.current = window.setInterval(() => {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-        const currentTime = playerRef.current.getCurrentTime();
-        setCurrentTime(currentTime);
+        try {
+          const currentTime = playerRef.current.getCurrentTime();
+          setCurrentTime(currentTime);
+        } catch (error) {
+          console.error("Error getting current time:", error);
+        }
       }
     }, 250); // Update 4 times per second
   };
 
   // Handle player state changes
   const onPlayerStateChange = (event: any) => {
-    setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
+    if (event && window.YT) {
+      setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
+    }
   };
 
   // Handle player errors
@@ -161,8 +173,12 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
   useEffect(() => {
     // When skipToPoint is called from FibonacciPoints or elsewhere
     if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
-      if (Math.abs(playerRef.current.getCurrentTime() - currentTime) > 0.5) {
-        playerRef.current.seekTo(currentTime, true);
+      try {
+        if (Math.abs(playerRef.current.getCurrentTime() - currentTime) > 0.5) {
+          playerRef.current.seekTo(currentTime, true);
+        }
+      } catch (error) {
+        console.error("Error seeking to time:", error);
       }
     }
   }, [currentTime]);
@@ -232,6 +248,7 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
           currentTime={currentTime}
           onPointClick={skipToPoint}
           formatTime={formatTime}
+          testMode={testMode}
         />
       </div>
       

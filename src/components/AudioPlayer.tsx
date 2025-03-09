@@ -23,6 +23,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   songId,
   testMode = false
 }) => {
+  if (!songId) {
+    console.error("AudioPlayer: No songId provided");
+  }
+  
   return (
     <div className="audio-player glass-panel p-4 rounded-lg">
       <PlayerProvider onTimeUpdate={onTimeUpdate}>

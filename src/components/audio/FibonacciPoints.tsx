@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -30,7 +31,7 @@ const FibonacciPoints: React.FC<FibonacciPointsProps> = ({
   };
 
   return (
-    <div className="flex flex-wrap mt-4 gap-2">
+    <div className="flex flex-wrap gap-2">
       {fibonacciPoints.map((point, i) => (
         <button
           key={i}

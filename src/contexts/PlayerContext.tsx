@@ -45,6 +45,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({
 
   // Format time function
   const formatTime = (seconds: number): string => {
+    if (isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -52,6 +53,10 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({
   
   // Skip to specific time point (for UI updates and YouTube API)
   const skipToPoint = (time: number) => {
+    if (isNaN(time)) {
+      console.error("Invalid time value:", time);
+      return;
+    }
     setLastSkipTime(Date.now());
     setCurrentTime(time);
     if (onTimeUpdate) onTimeUpdate(time);

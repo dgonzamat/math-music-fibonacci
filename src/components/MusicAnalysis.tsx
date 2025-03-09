@@ -77,12 +77,12 @@ const MusicAnalysis: React.FC = () => {
         if (tKeyPresses === 3) {
           setTestMode(prev => !prev);
           shadcnToast({
-            description: testMode 
-              ? "App will now run normally without test notifications" 
-              : "App will now test all interactions and show test results",
-            title: testMode ? "Test mode disabled" : "Test mode enabled",
+            description: !testMode // Use !testMode because the state hasn't updated yet
+              ? "App will now test all interactions and show test results" 
+              : "App will now run normally without test notifications",
+            title: !testMode ? "Test mode enabled" : "Test mode disabled",
           });
-          console.log(testMode ? "Test mode disabled" : "Test mode enabled");
+          console.log(!testMode ? "Test mode enabled" : "Test mode disabled");
           tKeyPresses = 0;
         }
       }
