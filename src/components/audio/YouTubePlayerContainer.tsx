@@ -1,0 +1,72 @@
+
+import React from 'react';
+import { Video, ExternalLink } from 'lucide-react';
+import { usePlayerContext } from '@/contexts/PlayerContext';
+
+interface YouTubePlayerContainerProps {
+  playerLoaded: boolean;
+  playerError: boolean;
+  getYouTubeFullUrl: () => string;
+  handleExternalLinkClick: () => void;
+  testId?: string;
+}
+
+const YouTubePlayerContainer: React.FC<YouTubePlayerContainerProps> = ({
+  playerLoaded,
+  playerError,
+  getYouTubeFullUrl,
+  handleExternalLinkClick,
+  testId = 'external-youtube-link'
+}) => {
+  return (
+    <>
+      <div className="flex items-center justify-between text-purple-400 mb-2">
+        <div className="flex items-center">
+          <Video className="w-5 h-5 mr-2" />
+          <span className="font-medium">Reproductor de YouTube</span>
+        </div>
+        <a 
+          href={getYouTubeFullUrl()} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center text-xs text-purple-300 hover:text-purple-100 transition-colors"
+          aria-label="Ver en YouTube"
+          onClick={handleExternalLinkClick}
+          data-testid={testId}
+        >
+          <ExternalLink className="w-3 h-3 mr-1" />
+          <span>Ver en YouTube</span>
+        </a>
+      </div>
+      
+      <div className="youtube-player w-full" style={{ minHeight: "80px" }}>
+        {playerError ? (
+          <div className="flex flex-col items-center justify-center h-20 bg-red-900/20 rounded-md p-2">
+            <p className="text-sm text-red-400 mb-2">Error al cargar el reproductor de YouTube</p>
+            <a 
+              href={getYouTubeFullUrl()}
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full text-xs flex items-center transition-colors"
+              onClick={handleExternalLinkClick}
+              data-testid="external-youtube-error-link"
+            >
+              <ExternalLink className="w-3 h-3 mr-1" />
+              Ver en YouTube
+            </a>
+          </div>
+        ) : (
+          <div id="youtube-player" className={`rounded-md transition-opacity duration-300 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}></div>
+        )}
+        
+        {!playerLoaded && !playerError && (
+          <div className="flex justify-center items-center h-20 bg-dark-tertiary/50 rounded-md animate-pulse">
+            <Video className="w-6 h-6 text-purple-400 animate-bounce" />
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default YouTubePlayerContainer;

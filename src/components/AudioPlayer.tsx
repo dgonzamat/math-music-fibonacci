@@ -1,7 +1,6 @@
 
 import React from 'react';
 import YouTubeMusicPlayer from './audio/YouTubeMusicPlayer';
-import ErrorDisplay from './audio/ErrorDisplay';
 import { PlayerProvider } from '@/contexts/PlayerContext';
 
 interface AudioPlayerProps {
