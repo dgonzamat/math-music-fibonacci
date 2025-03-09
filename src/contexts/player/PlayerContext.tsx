@@ -36,6 +36,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({
       console.error("Invalid time value:", time);
       return;
     }
+    console.log(`Skipping to ${time}s`);
     setLastSkipTime(Date.now());
     setCurrentTime(time);
     if (onTimeUpdate) onTimeUpdate(time);

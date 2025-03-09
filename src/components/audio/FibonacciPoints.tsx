@@ -21,7 +21,11 @@ const FibonacciPoints: React.FC<FibonacciPointsProps> = ({
   const clickedPointsRef = useRef<Set<number>>(new Set());
 
   const handlePointClick = (point: number) => {
+    console.log(`Clicking on Fibonacci point: ${point}s`);
     onPointClick(point);
+    
+    // Visual feedback
+    toast.success(`Navegando a ${formatTime(point)}`);
     
     if (testMode) {
       clickedPointsRef.current.add(point);

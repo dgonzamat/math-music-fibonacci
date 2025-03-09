@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { usePlayerContext } from '@/contexts/PlayerContext';
 
@@ -18,10 +18,13 @@ export const useYouTubePlayer = ({
   const playerRef = useRef<any>(null);
   // Reference to store the timer for polling player time
   const timeUpdateIntervalRef = useRef<number | null>(null);
+  // Track if player is ready to accept commands
+  const [playerReady, setPlayerReady] = useState(false);
   
   const { 
     setCurrentTime,
     setIsPlaying,
+    isPlaying,
     setPlayerLoaded, 
     setPlayerError,
     setCurrentSongId
@@ -45,20 +48,47 @@ export const useYouTubePlayer = ({
   const getYouTubeFullUrl = () => {
     if (!songId) return 'https://www.youtube.com/watch?v=Y7JG63IuaWs';
     
-    switch (songId) {
-      case 'lateralus':
-        return 'https://www.youtube.com/watch?v=Y7JG63IuaWs';
-      case 'schism':
-        return 'https://www.youtube.com/watch?v=80RtBeB61LE';
-      case 'fibonacci': // Forty Six & 2
-        return 'https://www.youtube.com/watch?v=GIuZUCpm9hc';
-      default:
-        return 'https://www.youtube.com/watch?v=Y7JG63IuaWs';
+    const videoId = getYouTubeVideoId(songId);
+    return `https://www.youtube.com/watch?v=${videoId}`;
+  };
+
+  // Play the video
+  const playVideo = () => {
+    if (playerRef.current && playerReady) {
+      try {
+        playerRef.current.playVideo();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Error playing video:", error);
+        toast.error("Error al reproducir el video");
+      }
+    }
+  };
+
+  // Pause the video
+  const pauseVideo = () => {
+    if (playerRef.current && playerReady) {
+      try {
+        playerRef.current.pauseVideo();
+        setIsPlaying(false);
+      } catch (error) {
+        console.error("Error pausing video:", error);
+      }
+    }
+  };
+
+  // Toggle play/pause
+  const togglePlayPause = () => {
+    if (isPlaying) {
+      pauseVideo();
+    } else {
+      playVideo();
     }
   };
 
   // Handle player ready event
   const onYouTubePlayerReady = (event: any) => {
+    setPlayerReady(true);
     setPlayerLoaded(true);
     setPlayerError(false);
     toast.success("Reproductor de YouTube cargado");
@@ -85,7 +115,8 @@ export const useYouTubePlayer = ({
   // Handle player state changes
   const onYouTubePlayerStateChange = (event: any) => {
     if (event && window.YT) {
-      setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
+      const isPlayerPlaying = event.data === window.YT.PlayerState.PLAYING;
+      setIsPlaying(isPlayerPlaying);
     }
   };
 
@@ -94,6 +125,7 @@ export const useYouTubePlayer = ({
     console.error("YouTube player error:", event);
     setPlayerError(true);
     setPlayerLoaded(false);
+    setPlayerReady(false);
     toast.error("Error al cargar el reproductor de YouTube");
     
     if (onPlayerError) onPlayerError();
@@ -106,7 +138,10 @@ export const useYouTubePlayer = ({
     const videoId = getYouTubeVideoId(songId);
     const playerContainer = document.getElementById('youtube-player');
     
-    if (!playerContainer) return;
+    if (!playerContainer) {
+      console.error("YouTube player container not found");
+      return;
+    }
     
     try {
       // Create new player instance
@@ -117,6 +152,7 @@ export const useYouTubePlayer = ({
         playerVars: {
           autoplay: 0,
           modestbranding: 1,
+          controls: 1,
           rel: 0
         },
         events: {
@@ -147,11 +183,15 @@ export const useYouTubePlayer = ({
       firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
     }
 
-    // Initialize player when API is ready
-    window.onYouTubeIframeAPIReady = initializePlayer;
+    // Function to run when YouTube API is ready
+    window.onYouTubeIframeAPIReady = () => {
+      console.log("YouTube API ready, initializing player");
+      initializePlayer();
+    };
 
     // If YouTube API is already loaded, initialize player directly
     if (window.YT && window.YT.Player) {
+      console.log("YouTube API already loaded, initializing player directly");
       initializePlayer();
     }
 
@@ -160,26 +200,44 @@ export const useYouTubePlayer = ({
       if (timeUpdateIntervalRef.current) {
         window.clearInterval(timeUpdateIntervalRef.current);
       }
+      // Clean up player instance
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (error) {
+          console.error("Error destroying YouTube player:", error);
+        }
+      }
     };
   }, [songId]);
   
   // Method to seek to a specific time
   const seekTo = (time: number) => {
-    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
+    if (playerRef.current && playerReady) {
       try {
-        if (Math.abs(playerRef.current.getCurrentTime() - time) > 0.5) {
-          playerRef.current.seekTo(time, true);
+        console.log(`Seeking to ${time}s`);
+        playerRef.current.seekTo(time, true);
+        // Auto-play after seeking
+        if (!isPlaying) {
+          setTimeout(() => playVideo(), 300);
         }
       } catch (error) {
         console.error("Error seeking to time:", error);
+        toast.error("Error al navegar a ese punto del video");
       }
+    } else {
+      console.warn("Player not ready for seeking to", time);
     }
   };
   
   return {
     playerRef,
     seekTo,
-    getYouTubeFullUrl
+    getYouTubeFullUrl,
+    playVideo,
+    pauseVideo,
+    togglePlayPause,
+    playerReady
   };
 };
 

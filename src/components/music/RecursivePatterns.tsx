@@ -2,6 +2,8 @@
 import React from 'react';
 import { ChevronDown, ChevronUp, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePlayerContext } from '@/contexts/PlayerContext';
+import { toast } from 'sonner';
 
 interface Pattern {
   startTime: number;
@@ -29,10 +31,13 @@ const RecursivePatterns: React.FC<RecursivePatternsProps> = ({
   togglePatternExpand,
   currentTime
 }) => {
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const { formatTime, skipToPoint } = usePlayerContext();
+
+  const handlePlayPattern = (startTime: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log(`Playing pattern at ${startTime}s`);
+    skipToPoint(startTime);
+    toast.success(`Reproduciendo desde ${formatTime(startTime)}`);
   };
 
   return (
@@ -87,17 +92,11 @@ const RecursivePatterns: React.FC<RecursivePatternsProps> = ({
                           <p>{pattern.description}</p>
                           <button 
                             className="mt-2 flex items-center text-golden hover:text-golden/80 transition-colors text-xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const audioElement = document.querySelector('audio');
-                              if (audioElement) {
-                                audioElement.currentTime = pattern.startTime;
-                                audioElement.play();
-                              }
-                            }}
+                            onClick={(e) => handlePlayPattern(pattern.startTime, e)}
+                            data-testid={`play-pattern-${levelData.level}-${i}`}
                           >
                             <Play size={12} className="mr-1" />
-                            Listen to this pattern
+                            Escuchar este patrón
                           </button>
                         </div>
                       )}

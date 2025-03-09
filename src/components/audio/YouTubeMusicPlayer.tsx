@@ -25,25 +25,52 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
     playerLoaded, 
     setPlayerLoaded, 
     playerError, 
-    setPlayerError
+    setPlayerError,
+    isPlaying
   } = usePlayerContext();
   
   // Track external link clicks for testing
   const linkClickTrackerRef = useRef<boolean>(false);
   
-  const { seekTo, getYouTubeFullUrl } = useYouTubePlayer({
+  const { 
+    seekTo, 
+    getYouTubeFullUrl, 
+    playerReady,
+    togglePlayPause 
+  } = useYouTubePlayer({
     songId,
-    onPlayerReady: () => setPlayerLoaded(true),
+    onPlayerReady: () => {
+      setPlayerLoaded(true);
+      console.log("Player ready callback executed");
+    },
     onPlayerError: () => {
       setPlayerError(true);
       setPlayerLoaded(false);
+      console.error("Player error callback executed");
     }
   });
   
   // Jump to specific time point
   useEffect(() => {
-    seekTo(currentTime);
-  }, [currentTime, seekTo]);
+    if (playerReady) {
+      seekTo(currentTime);
+    }
+  }, [currentTime]);
+
+  // Handle Fibonacci point click
+  const handleFibonacciPointClick = (time: number) => {
+    console.log(`Fibonacci point clicked: ${time}s`);
+    skipToPoint(time);
+    
+    // This ensures seekTo is actually called with the new time
+    setTimeout(() => {
+      seekTo(time);
+    }, 50);
+    
+    if (testMode) {
+      toast.success(`Navegando a ${formatTime(time)}`);
+    }
+  };
 
   // Track external link clicks
   const handleExternalLinkClick = () => {
@@ -62,14 +89,18 @@ const YouTubeMusicPlayer: React.FC<YouTubeMusicPlayerProps> = ({
         playerError={playerError}
         getYouTubeFullUrl={getYouTubeFullUrl}
         handleExternalLinkClick={handleExternalLinkClick}
+        togglePlayPause={togglePlayPause}
+        isPlaying={isPlaying}
+        playerReady={playerReady}
       />
       
       {/* Fibonacci points for YouTube player */}
       <div className="mt-4">
+        <h3 className="text-sm text-golden mb-2 font-medium">Puntos Fibonacci:</h3>
         <FibonacciPoints
           fibonacciPoints={fibonacciPoints}
           currentTime={currentTime}
-          onPointClick={skipToPoint}
+          onPointClick={handleFibonacciPointClick}
           formatTime={formatTime}
           testMode={testMode}
         />

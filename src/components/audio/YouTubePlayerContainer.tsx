@@ -1,13 +1,17 @@
 
 import React from 'react';
-import { Video, ExternalLink } from 'lucide-react';
+import { Video, ExternalLink, Play, Pause } from 'lucide-react';
 import { usePlayerContext } from '@/contexts/PlayerContext';
+import { cn } from '@/lib/utils';
 
 interface YouTubePlayerContainerProps {
   playerLoaded: boolean;
   playerError: boolean;
   getYouTubeFullUrl: () => string;
   handleExternalLinkClick: () => void;
+  togglePlayPause: () => void;
+  isPlaying: boolean;
+  playerReady: boolean;
   testId?: string;
 }
 
@@ -16,6 +20,9 @@ const YouTubePlayerContainer: React.FC<YouTubePlayerContainerProps> = ({
   playerError,
   getYouTubeFullUrl,
   handleExternalLinkClick,
+  togglePlayPause,
+  isPlaying,
+  playerReady,
   testId = 'external-youtube-link'
 }) => {
   return (
@@ -39,9 +46,9 @@ const YouTubePlayerContainer: React.FC<YouTubePlayerContainerProps> = ({
         </a>
       </div>
       
-      <div className="youtube-player w-full" style={{ minHeight: "80px" }}>
+      <div className="youtube-player-wrapper relative w-full" style={{ minHeight: "180px" }}>
         {playerError ? (
-          <div className="flex flex-col items-center justify-center h-20 bg-red-900/20 rounded-md p-2">
+          <div className="flex flex-col items-center justify-center h-40 bg-red-900/20 rounded-md p-2">
             <p className="text-sm text-red-400 mb-2">Error al cargar el reproductor de YouTube</p>
             <a 
               href={getYouTubeFullUrl()}
@@ -56,11 +63,32 @@ const YouTubePlayerContainer: React.FC<YouTubePlayerContainerProps> = ({
             </a>
           </div>
         ) : (
-          <div id="youtube-player" className={`rounded-md transition-opacity duration-300 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}></div>
+          <>
+            <div 
+              id="youtube-player" 
+              className={cn(
+                "rounded-md transition-opacity duration-300 w-full", 
+                playerLoaded ? 'opacity-100' : 'opacity-0'
+              )}
+            ></div>
+            
+            {playerLoaded && playerReady && (
+              <div className="mt-2 flex justify-center">
+                <button
+                  onClick={togglePlayPause}
+                  className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full transition-colors"
+                  aria-label={isPlaying ? "Pausar" : "Reproducir"}
+                  data-testid="play-pause-button"
+                >
+                  {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                </button>
+              </div>
+            )}
+          </>
         )}
         
         {!playerLoaded && !playerError && (
-          <div className="flex justify-center items-center h-20 bg-dark-tertiary/50 rounded-md animate-pulse">
+          <div className="flex justify-center items-center h-40 bg-dark-tertiary/50 rounded-md animate-pulse">
             <Video className="w-6 h-6 text-purple-400 animate-bounce" />
           </div>
         )}
