@@ -12,6 +12,7 @@ import SongAnalysisPanel from './music/SongAnalysisPanel';
 import RecursivePatterns from './music/RecursivePatterns';
 import SongStructureTimeline from './music/SongStructureTimeline';
 import { toast } from 'sonner';
+import { useToast } from "@/hooks/use-toast";
 
 const MusicAnalysis: React.FC = () => {
   const [selectedSong, setSelectedSong] = useState(toolSongs[0]);
@@ -20,6 +21,7 @@ const MusicAnalysis: React.FC = () => {
   const [recursionLevel, setRecursionLevel] = useState(1);
   const [expandedPatterns, setExpandedPatterns] = useState<string[]>([]);
   const [testMode, setTestMode] = useState(false);
+  const { toast: shadcnToast } = useToast();
   
   const analysis = getFibonacciAnalysis(selectedSong.id);
   const visualData = getFibonacciVisualData(selectedSong.id);
@@ -74,11 +76,11 @@ const MusicAnalysis: React.FC = () => {
         
         if (tKeyPresses === 3) {
           setTestMode(prev => !prev);
-          toast({
-            title: testMode ? "Test mode disabled" : "Test mode enabled",
+          shadcnToast({
             description: testMode 
               ? "App will now run normally without test notifications" 
-              : "App will now test all interactions and show test results"
+              : "App will now test all interactions and show test results",
+            title: testMode ? "Test mode disabled" : "Test mode enabled",
           });
           console.log(testMode ? "Test mode disabled" : "Test mode enabled");
           tKeyPresses = 0;
@@ -88,7 +90,7 @@ const MusicAnalysis: React.FC = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [testMode]);
+  }, [testMode, shadcnToast]);
   
   return (
     <div className="w-full">
