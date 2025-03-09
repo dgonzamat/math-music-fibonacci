@@ -2,6 +2,7 @@
 import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { usePlayerContext } from '@/contexts/player';
 
 interface FibonacciPointsProps {
   fibonacciPoints: number[];
@@ -19,10 +20,15 @@ const FibonacciPoints: React.FC<FibonacciPointsProps> = ({
   testMode = false
 }) => {
   const clickedPointsRef = useRef<Set<number>>(new Set());
+  const { skipToPoint } = usePlayerContext();
 
   const handlePointClick = (point: number) => {
     console.log(`Clicking on Fibonacci point: ${point}s`);
+    // Notify the parent component
     onPointClick(point);
+    
+    // Also use the context for global synchronization
+    skipToPoint(point);
     
     // Visual feedback
     toast.success(`Navegando a ${formatTime(point)}`);
